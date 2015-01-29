@@ -1,3 +1,0 @@
-C:/Users/Tobias/Desktop/KEX/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/Tobias/Desktop/KEX/build/CMakeFiles/textureExample.dir
-C:/Users/Tobias/Desktop/KEX/build/CMakeFiles/ZERO_CHECK.dir
