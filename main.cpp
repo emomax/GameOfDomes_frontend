@@ -7,36 +7,7 @@
 
 #include "classroom\SkyBox.h"
 #include "classroom\Projectile.h"
-
-// Remove warnings
-#ifdef _MSC_VER
-	#define _CRT_SECURE_NO_WARNINGS
-	#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#endif
-
-//////////////////////////// SFS
-
-// Define timeout for connection
-#define SMARTFOX_MAXIMUMWAITFORCONNECTIONESTABLISHMENT	10000	// UM: milliseconds. The time to wait the establishment of connection with SmartFox
-
-#include "..\..\..\..\..\..\Program Files\trunk_api\SmartFox.h"
-#include "..\..\..\..\..\..\Program Files\trunk_api\Requests\ExtensionRequest.h"
-#include "..\..\..\..\..\..\Program Files\trunk_api\Requests\JoinRoomRequest.h"
-#include "..\..\..\..\..\..\Program Files\trunk_api\Requests\LoginRequest.h"
-
-HANDLE SmartFoxConnectionEstablished;
-boost::shared_ptr<Sfs2X::SmartFox> m_ptrSmartFox;
-
-// handle smartfox events
-static void OnSmartFoxConnection(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);
-/*static void OnSmartFoxConnectionLost(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);
-static void OnSmartFoxRoomJoined(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);
-*/static void OnSmartFoxLogin(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);
-/*static void OnSmartFoxDisconnection(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);
-static void OnSmartFoxLoginError(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);
-static void OnSmartFoxLogout(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);
-*/static void OnSmartFoxExtensionResponse(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);
-/*static void OnUDPInit(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent);*/
+#include "classroom\NetworkManager.h"
 
 //! Shorter and fancier way of outputing a string.
 void put(char* s) {
@@ -44,125 +15,6 @@ void put(char* s) {
 }
 
 
-//! This handler takes care of setup once we have established a connection to the server. If we successfully log in we will attempt to send a request for logging in.
-void OnSmartFoxConnection(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent)
-{
-	put("OnSmartFoxConnection()");
-	// Get the pointer to Main Frame class
-	//* ptrMainFrame = (MainFrame*)ptrContext;
-
-	//if (ptrMainFrame == NULL) {
-	//	return;
-	//}
-
-	// See that connection is established.
-	boost::shared_ptr<map<string, boost::shared_ptr<void>>> ptrEventParams = ptrEvent->Params();
-	boost::shared_ptr<void> ptrEventParamValueSuccess = (*ptrEventParams)["success"];
-	boost::shared_ptr<bool> ptrSuccessMessage = ((boost::static_pointer_cast<bool>))(ptrEventParamValueSuccess);
-
-	if (*ptrSuccessMessage == true)
-	{
-		put("Connection established!");
-		// Connection with SmartFox Server has been established
-		// Set internal event to notify the connection establishment
-		SetEvent(SmartFoxConnectionEstablished);
-	}
-	else {
-		put("Connection failed..");
-		return;
-	}
-
-	// We got response from server. Let's wait a while 
-	// to see if we successfully connect to the server.
-	DWORD dwRc = ::WaitForSingleObject(SmartFoxConnectionEstablished, SMARTFOX_MAXIMUMWAITFORCONNECTIONESTABLISHMENT);
-
-	switch (dwRc) {
-	case WAIT_OBJECT_0:	{
-		// Our waiter said we're all A-OK. 
-		// Let's send a request for logging in.
-
-		// Convert a TCHAR string to a std string
-		string szConvertedUtf8String = "Emomax";
-
-		// Perform login request
-		boost::shared_ptr<IRequest> request(new LoginRequest(string(szConvertedUtf8String), "", "BasicExamples"));
-		m_ptrSmartFox->Send(request);
-
-		put("Request for logging in sent!");
-
-		break;
-	}
-
-	case WAIT_TIMEOUT: {
-			// Timeout
-			put("ERROR: Timeout establishing connection with SmartFoxServer");
-			break;
-		}
-
-		default: {
-			break;
-		}
-	}
-
-}
-
-//! Says what to do once the server confirmed our login request. As of 0.0.1 it only sends a request for one of the server extensions.
-void OnSmartFoxLogin(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent) {
-	// get pointer to main frame.
-	//MainFrame* ptrMainFrame = (MainFrame*)ptrContext;
-
-	put("Logged in!");
-
-
-	// For now we settle with TCP transmitting. 
-	// It seems to be something wrong with the c++ api..
-
-	put("Attempting to join room 'The Lobby'..");
-
-	// Convert a TCHAR string to a std string
-	boost::shared_ptr<string> ptrStdRoomName(new string("The Lobby"));
-
-	boost::shared_ptr<IRequest> request(new JoinRoomRequest(*ptrStdRoomName));
-	m_ptrSmartFox->Send(request);
-
-	put("JoinRoom request sent!");
-
-
-	/* put("Attempt to init UDP transmitting..");
-	ptrMainFrame->m_ptrSmartFox->InitUDP();
-	put("UDP handshake request sent!");
-
-	put("IT ISN'T initiated");
-	//while (!ptrMainFrame->m_ptrSmartFox->UdpInited()) {	}
-
-	//put("It's inited!");*/
-
-}
-
-
-//! When something from a server extension is received this function is called. Could be position updating  of gameobject, a private message or just a notification. The ["cmd"] parameter of the event that is received  reveals which extension that was spitting out the info. Based on extension this function will do different things.
-void OnSmartFoxExtensionResponse(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent) {
-	
-
-	put("Item received!");
-
-	// Get the square parameter of the event
-	boost::shared_ptr<map<string, boost::shared_ptr<void>>> ptrEventParams = ptrEvent->Params();
-	boost::shared_ptr<void> ptrEventParamValueCmd = (*ptrEventParams)["cmd"];
-	boost::shared_ptr<string> ptrNotifiedCmd = ((boost::static_pointer_cast<string>)(ptrEventParamValueCmd));
-
-	// check the type of the command
-	if (*ptrNotifiedCmd == "ShipTransform") {
-		boost::shared_ptr<void> ptrEventParamValueParams = (*ptrEventParams)["params"];
-		boost::shared_ptr<ISFSObject> ptrNotifiedISFSObject = ((boost::static_pointer_cast<ISFSObject>)(ptrEventParamValueParams));
-		double rotX = *(ptrNotifiedISFSObject->GetDouble("rotX"));
-		double rotY = *(ptrNotifiedISFSObject->GetDouble("rotY"));
-
-		cout << "new rotX is: " << rotX << " and rotY is: " << rotY << endl;
-	}
-}
-
-///////////////////////////////////////
 sgct::Engine * gEngine;
 
 //Not using ref pointers enables
@@ -218,56 +70,47 @@ const double turn_speed = 3.0;
 //vector containing all projectiles in the scene
 std::vector<Projectile> missiles;
 
+// Handle networking
+NetworkManager manager;
+
+// Set the function for what happens when we get response
+// from a server extension
+
+//! When something from a server extension is received this function is called. Could be position updating  of gameobject, a private message or just a notification. The ["cmd"] parameter of the event that is received  reveals which extension that was spitting out the info. Based on extension this function will do different things.
+void NetworkManager::OnSmartFoxExtensionResponse(unsigned long long ptrContext, boost::shared_ptr<BaseEvent> ptrEvent) {
+	// get pointer to main frame.
+	NetworkManager* ptrMainFrame = (NetworkManager*)ptrContext;
+
+	cout << "Item received!" << endl;
+
+	// Check that we're still alive and running
+	if (ptrMainFrame == NULL) {
+		return;
+	}
+
+	// Get the cmd parameter of the event
+	boost::shared_ptr<map<string, boost::shared_ptr<void>>> ptrEventParams = ptrEvent->Params();
+	boost::shared_ptr<void> ptrEventParamValueCmd = (*ptrEventParams)["cmd"];
+	boost::shared_ptr<string> ptrNotifiedCmd = ((boost::static_pointer_cast<string>)(ptrEventParamValueCmd));
+
+	// check the type of the command
+	if (*ptrNotifiedCmd == "ShipTransform") {
+		boost::shared_ptr<void> ptrEventParamValueParams = (*ptrEventParams)["params"];
+		boost::shared_ptr<ISFSObject> ptrNotifiedISFSObject = ((boost::static_pointer_cast<ISFSObject>)(ptrEventParamValueParams));
+		double rotX = *(ptrNotifiedISFSObject->GetDouble("rotX"));
+		double rotY = *(ptrNotifiedISFSObject->GetDouble("rotY"));
+
+		theta.setVal(rotX * (PI / 180));
+		phi.setVal(-rotY * (PI / 180));
+
+		cout << "new rotX is: " << rotX << " and rotY is: " << rotY << endl;
+	}
+}
+
 
 int main(int argc, char* argv[])
 {
-	// SFS test scenario //////////
-	
-	
-	// Set handle to listen for login.
-	SmartFoxConnectionEstablished = CreateEvent(NULL,		// Pointer to the security attribute
-		FALSE,		// Flag for manual reset
-		FALSE,		// Flag for initial state
-		NULL);
-
-	m_ptrSmartFox = boost::shared_ptr<Sfs2X::SmartFox>(new Sfs2X::SmartFox(true));
-	m_ptrSmartFox->ThreadSafeMode(false);
-
-	// Handle connecting
-
-	m_ptrSmartFox->AddEventListener(SFSEvent::CONNECTION, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxConnection, 0)));
-
-	std::cout << "Attempting to load config.. \n";
-
-	// load config
-	m_ptrSmartFox->LoadConfig(".\\Configuration\\sfs-config.xml", true);
-
-
-	std::cout << "Config loaded. \n";
-
-	std:: cout << "SmartFoxServer connection initiated!" << std::endl;
-
-
-	// set eventlisteners
-	// Handle connecting
-	m_ptrSmartFox->AddEventListener(SFSEvent::CONNECTION, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxConnection, 0)));
-	// Handle connection lost
-	/*m_ptrSmartFox->AddEventListener(SFSEvent::CONNECTION_LOST, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxConnectionLost, 0)));
-	// Handle room joining
-	m_ptrSmartFox->AddEventListener(SFSEvent::ROOM_JOIN, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxRoomJoined, 0)));
-	// Handle login
-	*/m_ptrSmartFox->AddEventListener(SFSEvent::LOGIN, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxLogin, 0)));
-	// Handle login error
-	/*m_ptrSmartFox->AddEventListener(SFSEvent::LOGIN_ERROR, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxLoginError, 0)));
-	// Handle logout
-	m_ptrSmartFox->AddEventListener(SFSEvent::LOGOUT, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxLogout, 0)));
-	// Handle disconnecting
-	m_ptrSmartFox->AddEventListener(BitSwarmEvent::DISCONNECT, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxDisconnection, 0)));
-	// Handle extension repsonse
-	*/m_ptrSmartFox->AddEventListener(SFSEvent::EXTENSION_RESPONSE, boost::shared_ptr<EventListenerDelegate>(new EventListenerDelegate(OnSmartFoxExtensionResponse, 0)));
-
-
-	///////////////////////////////
+	manager.init();
 
 	//SGCT setup
 	gEngine = new sgct::Engine(argc, argv);
