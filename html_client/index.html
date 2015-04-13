@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=utf-8 />
+	<title></title>
+	<!--<link rel="stylesheet" type="text/css" media="screen" href="css/master.css" />-->
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+	<script type="text/javascript" src="smartfoxclient/SFS2X_API_JS.js"></script>
+	<script type="text/javascript" src="scripts/main.js"></script>
+	
+	<!--[if IE]>
+		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	
+	<script type="text/javascript">
+		$(document).ready(function () {
+			
+			   document.body.addEventListener('touchstart', onButtonClick, false);
+			   document.body.addEventListener('touchend', onButtonUp, false);
+			
+			//$("#rotateBtn").addEventListener('touchstart', onButtonClick);
+			//$("#rotateBtn").mouseup(onButtonUp);
+	    });
+	</script>
+</head>
+<body onLoad="init()">
+	
+	<!--<input type="button" id="rotateBtn" value="Rotate X"/>-->
+	
+	<div style="min-width: 100px; height: 130px; background-color: red;" id="rotateBtn">
+		
+	</div>
+	
+</body>
+</html>
