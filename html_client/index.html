@@ -1,35 +1,217 @@
 <!DOCTYPE html>
-<html>
-<head>
-	<meta charset=utf-8 />
-	<title></title>
-	<!--<link rel="stylesheet" type="text/css" media="screen" href="css/master.css" />-->
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-	<script type="text/javascript" src="smartfoxclient/SFS2X_API_JS.js"></script>
-	<script type="text/javascript" src="scripts/main.js"></script>
-	
-	<!--[if IE]>
-		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
-	
-	<script type="text/javascript">
-		$(document).ready(function () {
-			
-			   document.body.addEventListener('touchstart', onButtonClick, false);
-			   document.body.addEventListener('touchend', onButtonUp, false);
-			
-			//$("#rotateBtn").addEventListener('touchstart', onButtonClick);
-			//$("#rotateBtn").mouseup(onButtonUp);
-	    });
-	</script>
-</head>
-<body onLoad="init()">
-	
-	<!--<input type="button" id="rotateBtn" value="Rotate X"/>-->
-	
-	<div style="min-width: 100px; height: 130px; background-color: red;" id="rotateBtn">
+<html style='height: 100%;'>
+	<head>
+		<meta charset=utf-8 />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" media="screen" href="styles/style.css" />
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+		<script type="text/javascript" src="smartfoxclient/SFS2X_API_JS.js"></script>
+		<script type="text/javascript" src="scripts/main.js"></script>
+		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
 		
-	</div>
-	
-</body>
+		<!--[if IE]>
+			<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+		
+		<script type="text/javascript">
+			
+			$(document).ready(function () {
+					window.scrollTo(0,1);
+					
+					document.getElementById('engineer').addEventListener('touchend', onButtonUp);
+					document.getElementById('gunner').addEventListener('touchend', onButtonUp);
+					document.getElementById('pilot').addEventListener('touchend', onButtonUp);
+					
+					/*document.getElementById("rotateBtnLeft").addEventListener('touchstart', onButtonClick, false);
+					document.getElementById("rotateBtnLeft").addEventListener('touchend', onButtonUp, false);
+					document.getElementById("rotateBtnLeft").addEventListener('touchcancel', onButtonUp, false);
+
+					document.getElementById("rotateBtnRight").addEventListener('touchstart', onButtonClick, false);
+					document.getElementById("rotateBtnRight").addEventListener('touchend', onButtonUp, false);
+					document.getElementById("rotateBtnRight").addEventListener('touchcancel', onButtonUp, false);
+
+					document.getElementById("rotateBtnUp").addEventListener('touchstart', onButtonClick, false);
+					document.getElementById("rotateBtnUp").addEventListener('touchend', onButtonUp, false);
+					document.getElementById("rotateBtnUp").addEventListener('touchcancel', onButtonUp, false);
+
+					document.getElementById("rotateBtnDown").addEventListener('touchstart', onButtonClick, false);
+					document.getElementById("rotateBtnDown").addEventListener('touchend', onButtonUp, false);
+					document.getElementById("rotateBtnDown").addEventListener('touchcancel', onButtonUp, false);
+
+					document.getElementById("thrustBtn").addEventListener('touchstart', onButtonClick, false);
+					document.getElementById("thrustBtn").addEventListener('touchend', onButtonUp, false);
+					document.getElementById("thrustBtn").addEventListener('touchcancel', onButtonUp, false);*/
+
+					// setup canvas for steering
+					
+					
+			});
+			
+			var clicked = false;
+			
+			$(document).keydown(function(e) {
+				switch(e.which) {
+					case 37: // left
+						
+						if (!clicked ) {
+							onButtonClick();
+							clicked = true;
+						}
+						
+						break;
+
+					case 38: // up	
+						break;
+
+					case 39: // right
+					
+						if (!clicked ) {
+							onButtonClick();
+							clicked = true;
+						}
+						break;
+
+					case 40: // down
+						break;
+
+					default: return; // exit this handler for other keys
+				}
+				e.preventDefault(); // prevent the default action (scroll / move caret)
+			});
+		
+			$(document).keyup(function(e) {
+				switch(e.which) {
+					case 37: // left
+						onButtonUp();
+						clicked = false;
+					
+					break;
+
+					case 38: // up
+						break;
+
+					case 39: // right
+						onButtonUp();
+						clicked = false;
+						break;
+
+					case 40: // down
+						break;
+
+					default: return; // exit this handler for other keys
+				}
+				e.preventDefault(); // prevent the default action (scroll / move caret)
+			});
+		</script>
+	</head>
+	<body onLoad="init()" <!--style= "height: 100%; background-color: black; margin: 0px;"-->>
+		
+		<div id="promptLandscape">
+			<center>
+				<h1> To play the game, please rotate the screen! </h1>
+			</center>
+		</div>
+		
+		<div id="mainScreen">			
+			<!--<input type="button" id="rotateBtn" value="Rotate X"/>-->
+			<div id="mainView">
+				<center>
+					<img src="images/logo.png" alt="Game of Domes" class='logoImg'>
+					<br>
+					<p> Enter username: </p><br>
+					<input type="text" name="userName" id='userName'>
+					<br>
+					<input type="button" onclick="attemptLogin();" value="Log in">
+				</center>
+			</div>		
+			
+			<div id='roleView'>
+				<div id='engineer' class='roleImg'>
+					<!--<center><h2> Engineer </h2> </center>
+					<img src="images/engi_available.png" alt="Engineer" class='roleImg'>-->
+				</div>
+				<div id='gunner' class='roleImg'>
+					<!--<center><h2> Gunner </h2></center> 
+					<img src="images/gunner_available.png" alt="Gunner" class='roleImg'>-->
+				</div>
+				<div id='pilot' class='roleImg'>
+					<!--<center><h2> Pilot </h2></center>
+					<img src="images/pilot_available.png" alt="Pilot" class='roleImg'>-->
+				</div>
+			</div>
+			
+			<div id='engineerView'>
+				<div id='shields' style='width: 100%; height: 30%;'>
+					<center>
+						<h2> Shield power </h2> 
+						<input type="range" id="myRange" value="20">
+					</center>
+				</div>
+				<div id='guns' style='width: 100%; height: 30%; margin-top: 10px;'>
+					<center>
+						<h2> Gun power </h2> 
+						<input type="range" id="myRange" value="20">
+					</center>
+				</div>
+				<div id='engine' style='width: 100%; height: 30%; margin-top: 10px;'>
+					<center>
+						<h2> Engine power </h2> 
+						<input type="range" id="myRange" value="20">
+					</center>
+				</div>
+			</div>
+			
+			<div id='pilotView' style='display: none;'>
+				<div id="pilotContainer">
+					<canvas id="pilotCanvas">
+						Sorry, your browser do not support playing Game of Domes!
+					</canvas>
+				</div>
+				<!--
+				<div style="width: 50%; height: 80%; padding: 40px; float: right;">
+					<div id="thrustBtn" style="background-color: blue; width: 100%; height: 100%;"></div>
+				</div>
+				<div style="width: 40%; height: 100%; padding: 5px;">
+					<div style="width:100%; height: 33%;">
+						<div style="width: 33%; height: 100%; margin-left: 33%; background-color: red; float: left;" id="rotateBtnUp">	</div>
+					</div>
+					<div style="width: 100%; height: 33%;">	
+						<div style="width: 34%; height: 100%; background-color: red; float: right;" id="rotateBtnRight">	</div>
+						<div style="width: 33%; height: 100%; background-color: red;" id="rotateBtnLeft">	</div>
+					</div>
+					<div style="width: 100%; height: 33%; clear: all;">
+						
+						<div style="width: 33%; height: 100%; margin-left: 33%; background-color: red; float: left;" id="rotateBtnDown">
+							<!--<svg xmlns="http://www.w3.org/2000/svg" version="1.1" id = 'rotateBtnDown'>
+								<polygon points="1.251,98 1.251,77.684 52.48,32.295 98.748,77.684 98.748,98 "/>
+							</svg>
+						</div>
+					</div>
+				</div>-->
+				<div style="clear: both;"></div>
+			</div>
+		</div>
+	</body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
