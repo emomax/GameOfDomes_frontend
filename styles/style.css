@@ -1,3 +1,5 @@
+/* Reset browser-inherited properties */
+
 html, body{
 	background-color: #000;
 	height: 100%;
@@ -28,6 +30,21 @@ html, body{
 	}
 }
 
+#promptLandscape {
+	color: #fff;
+}
+
+#mainScreen {
+	margin: 0px;
+	padding: 0px;
+	height: 100%;
+	width: 100%;
+	color: #fff;
+	background-color: #000;
+}
+
+/* role selection items */
+
 #engineer {
 	background-image: url('../images/engi_available2.png');
 }
@@ -39,6 +56,23 @@ html, body{
 #gunner {
 	background-image: url('../images/gunner_available2.png');
 }
+
+/* fire and thrust button */
+
+#thrustAndFire {
+	background-image: url('../images/fire.png');
+	margin-right: 2%;
+	margin-top: 5%;
+	float: right;
+	width: 45%;
+	height: 100%;
+	background-size: contain;
+	background-repeat: no-repeat;
+	//background-color: #f00;
+}
+
+
+/* logoImg */
 
 .logoImg {
 	margin: 0px;
@@ -60,17 +94,9 @@ html, body{
 	padding: 0px;	
 }
 
-#promptLandscape {
-	color: #fff;
-}
-
-#mainScreen {
-	margin: 0px;
-	padding: 0px;
-	height: 100%;
-	width: 100%;
-	background-color: #0ff;
-}
+/*
+	VIEWS
+*/
 
 #mainView {
 	color: #fff;
@@ -100,7 +126,8 @@ html, body{
 }
 
 #pilotContainer {
-	width: 100%;
+	float: left;
+	width: 50%;
 	height: 100%;
 }
 

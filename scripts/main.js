@@ -31,9 +31,8 @@ function init() {
 	// Event listeners to implementation
 	//sfs.addEventListener(SFS2X.SFSEvent.)
 	
-	
+
 	sfs.connect();
-	
 }
 
 function onConnection(event) {
@@ -86,15 +85,21 @@ this.onButtonClick = function(e) {
 			inputRotY = (originY - _y) / (canvas.height / 2);
 			inputRotX =  (_x - originX) / (canvas.width / 2);
 			
+			/*
+			// Deprecated test to see which values to pass,
+			// parsing the sent value from float to hexadecimal
+			
 			var fadeValue = Math.sqrt(inputRotY * inputRotY + inputRotX * inputRotX);
 			if (fadeValue > 1) fadeValue = 0.9999;
 			
 				
 			// Draw something that looks 'ok'
-			ctx.rect(0,0,canvas.width, canvas.height);
-			var col = floatToHexa(fadeValue * 0.4);
+			var col = floatToHexa(fadeValue * 0.4);			
+			*/
 			
-			ctx.fillStyle= col;//'#000';
+			col = "#333";
+			ctx.rect(0,0,canvas.width, canvas.height);			
+			ctx.fillStyle = col;//'#000';
 			ctx.fill();
 					
 			ctx.beginPath();
@@ -109,16 +114,20 @@ this.onButtonClick = function(e) {
 			
 			// handle possible infinity cases
 			
-			if (inputRotY > 1) inputRotY = 1.0;
-			if (inputRotX > 1) inputRotX = 1.0;
-			if (inputRotY < -1) inputRotY = -1.0;
-			if (inputRotX < -1) inputRotX = -1.0;
 			
 			if (!touchingCanvas) {
 				touchingCanvas = true;
 				
 				timeoutRot = setInterval(function() {
 					e.preventDefault();
+					
+							
+					if (inputRotY > 1) inputRotY = 0.99;
+					if (inputRotX > 1) inputRotX = 0.99;
+					if (inputRotY < -1) inputRotY = -0.99;
+					if (inputRotX < -1) inputRotX = -0.99;
+					if (inputRotX == 0) inputRotX = 0.0001;
+					if (inputRotY == 0) inputRotY = 0.0001;
 					
 					var obj = {};
 						obj.inputRotY = inputRotY; // inverted due to axis orientation (-1);
@@ -138,111 +147,19 @@ this.onButtonClick = function(e) {
 			}
 			//alert('touching: (' + _x + ", " + _y + ")");
 			break;
-		case 'rotateBtnLeft':
-			timeoutLeft = setInterval(function() {
-				e.target.style.background = '#0000ff';
-				
-				var obj = {};
-					obj.inputDown = false;
-					obj.inputUp = false;
-					obj.inputRight= false;
-					obj.inputLeft = true;
-					
-				if (role == 'pilot') {
-					obj.inputForward = false;
-					obj.inputBackward = false;
-					sendItem("PilotControlEvent", obj);
-				} else {
-					obj.isFiring = false;
-					sendItem('GunnerControlEvent', obj);
-				}
-				
-			}, 20);
-			break;
-			
-		case 'rotateBtnRight':
-			timeoutRight = setInterval(function() {
-				e.target.style.background = '#0000ff';
-				
-				var obj = {};
-					obj.inputDown = false;
-					obj.inputUp = false;
-					obj.inputRight= true;
-					obj.inputLeft = false;
-					
-				if (role == 'pilot') {
-					obj.inputForward = false;
-					obj.inputBackward = false;
-					sendItem("PilotControlEvent", obj);
-				} else {
-					obj.isFiring = false;
-					sendItem('GunnerControlEvent', obj);
-				}
-				
-			}, 20);
-			break;
 						
-		case 'rotateBtnUp':
-			timeoutUp = setInterval(function() {
-				e.target.style.background = '#0000ff';
-				
-				var obj = {};
-					obj.inputDown = false;
-					obj.inputUp = true;
-					obj.inputRight= false;
-					obj.inputLeft = false;
-					
-				if (role == 'pilot') {
-					obj.inputForward = false;
-					obj.inputBackward = false;
-					sendItem("PilotControlEvent", obj);
-				} else {
-					obj.isFiring = false;
-					sendItem('GunnerControlEvent', obj);
-				}
-				
-			}, 20);
-			break;
-						
-		case 'rotateBtnDown':
-			timeoutDown = setInterval(function() {
-				if (e.changedTouches.length > 1)
-					e.target.style.background = '#00ff00';
-				else 
-					e.target.style.background = "#ffff00";
-				
-				var obj = {};
-					obj.inputDown = true;
-					obj.inputUp = false;
-					obj.inputRight= false;
-					obj.inputLeft = false;
-					
-				if (role == 'pilot') {
-					obj.inputForward = false;
-					obj.inputBackward = false;
-					sendItem("PilotControlEvent", obj);
-				} else {
-					obj.isFiring = false;
-					sendItem('GunnerControlEvent', obj);
-				}
-				
-			}, 20);
-			break;
-						
-		case 'thrustBtn':
+		case 'thrustAndFire':
 			timeoutThrust = setInterval(function() {
 				//e.target.style.background = '#0000ff';
-				
-				if (e.touches.length > 1)
-					e.target.style.background = '#00ff00';
-				else 
-					e.target.style.background = "#ffff00";
+				if (role=='pilot')
+					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward.png')";
+				else
+					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire.png')"; 
+					
 				
 				var obj = {};
-					obj.inputDown = false;
-					obj.inputUp = false;
-					obj.inputRight= false;
-					obj.inputLeft = false;
+					obj.inputRotY = 0.001;
+					obj.inputRotX = 0.001;
 					
 				if (role == 'pilot') {
 					obj.inputForward = true;
@@ -304,13 +221,13 @@ this.onButtonUp = function(e) {
 					var canvas = document.getElementById('pilotCanvas');
 					var ctx = canvas.getContext('2d');
 					
-					canvas.width = width/2;
+					canvas.width = width;
 					canvas.height = height;
 					
-					originX = width / 4;
+					originX = width / 2;
 					originY = height / 2;
 					
-					ctx.rect(0,0,width/2, height);
+					ctx.rect(0,0,width, height);
 					ctx.fillStyle='#000';
 					ctx.fill();
 			
@@ -320,7 +237,11 @@ this.onButtonUp = function(e) {
 					canvas.addEventListener('touchmove', onButtonClick);
 					canvas.addEventListener('touchend', onButtonUp);
 					
+					document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
+					document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
+					
 					alert('Canvas width and height: (' + width + ", " + height + ")");
+					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
 					window.scrollTo(1, 0);
 				}
 				break;
@@ -344,14 +265,14 @@ this.onButtonUp = function(e) {
 					var canvas = document.getElementById('pilotCanvas');
 					var ctx = canvas.getContext('2d');
 					
-					canvas.width = width/2;
+					canvas.width = width;
 					canvas.height = height;
 					
-					originX = width / 4;
+					originX = width / 2;
 					originY = height / 2;
 					
-					ctx.rect(0,0,width/2, height);
-					ctx.fillStyle='red';
+					ctx.rect(0,0,width, height);
+					ctx.fillStyle='#333';
 					ctx.fill();
 					
 					
@@ -361,35 +282,22 @@ this.onButtonUp = function(e) {
 					canvas.addEventListener('touchmove', onButtonClick);
 					canvas.addEventListener('touchend', onButtonUp);
 					
+					document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
+					document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
+					
 					alert('Canvas width and height: (' + width + ", " + height + ")");
+					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
 					window.scrollTo(1, 0);
 				}
 			break;
 		
-		case 'thrustBtn':			
+		case 'thrustAndFire':			
+			if (role=='pilot')
+				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
+			else 
+				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
+				
 			clearInterval(timeoutThrust);
-			e.target.style.background='blue';
-			e.target.style.background='red';
-			break;
-			
-		case 'rotateBtnUp':
-			clearInterval(timeoutUp);
-			e.target.style.background='red';
-			break;
-			
-		case 'rotateBtnDown':
-			clearInterval(timeoutDown);
-			e.target.style.background='red';
-			break;
-			
-		case 'rotateBtnRight':
-			clearInterval(timeoutRight);
-			e.target.style.background='red';
-			break;
-			
-		case 'rotateBtnLeft':
-			clearInterval(timeoutLeft);
-			e.target.style.background='red';
 			break;
 			
 		case 'pilotCanvas':
@@ -401,7 +309,7 @@ this.onButtonUp = function(e) {
 				
 			// Draw something that looks 'ok'
 			ctx.rect(0,0,canvas.width, canvas.height);
-			ctx.fillStyle='#000';
+			ctx.fillStyle='#333';
 			ctx.fill();
 			
 			
@@ -420,8 +328,18 @@ this.onButtonUp = function(e) {
 this.attemptLogin = function(e) {
 	var userName = document.getElementById("userName");
 	
-	var uName = userName.value;	
-	var isSent = sfs.send(new SFS2X.Requests.System.LoginRequest(uName));
+	if (/[a-zA-Z]{3,}/.test(userName.value)) {		
+		var uName = userName.value;	
+		var isSent = sfs.send(new SFS2X.Requests.System.LoginRequest(uName));
+	} else {
+		var uName = getNewName();
+		alert('Sorry, your username is too short!');
+		alert ('.. so we gave you a another nickname: \n' + uName);
+		
+		var isSent = sfs.send(new SFS2X.Requests.System.LoginRequest(uName));
+		//document.getElementById("userName").value = "";
+	}
+	
 }
 
 // NETWORK HANDLING
@@ -478,7 +396,12 @@ function floatToHexa(val) {
 	return toReturn;
 }
 
-
+function getNewName() {
+	var firstnames = ["Jessie", "Drax", "Star-lord", "Mario", "Peach", "Piggy", "Max", "Torsten", "Henrietta", "Bock"];
+	var surnames = [" the Formidable", " the Relinquisher", " of Doom", " the Domebringer", " the Destroyer", " of Many Treats", " of Self-Disrespect"];
+	
+	return firstnames[Math.floor(Math.random() * firstnames.length)] + surnames[Math.floor(Math.random() * surnames.length)];	
+}
 
 
 
