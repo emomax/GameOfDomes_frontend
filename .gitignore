@@ -1,0 +1,5 @@
+build/
+domeConnector/debug
+domeConnector/ipch
+*.sdf
+

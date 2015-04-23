@@ -1,0 +1,16 @@
+Space Role-Playing-Game for DOME-theatre.
+
+Update - 2015-04-06: 
+Build phase completed. 
+
+In order to get everything to work for this version the latest version (as of now, 2.5 in sgct, 3.2 in osg) are needed. SGCT can be installed on a windowsmachine using the MSCV12 built x86 version available on C-Wiki. OSG can be downloaded and must be compiled for the x86 / vc12 version to comply with all other libraries. For OSG to include third party library, you need the third party libraries of ZLIB which can be found at http://www.osgvisual.org/projects/osgvisual/wiki/Downloads#Dependencies. These must be properly linked in the CMake configuration when building the OSG project. The include directory for all external parts (PNG, TIFF etc) will be the same include directory, i.e. the one found in the download referred to above. 
+
+The smartfox client api for c++ can be found at http://smartfoxserver.com/download/sfs2x#p=client and the instructions for setting up linking for the smartfoxclient project is found at http://docs2x.smartfoxserver.com/GettingStarted/client-api-cpp
+
+Once built, the project should be built using the osgExample provided in the SGCT examples download found at earlier mentioned link (C-Wiki). Inconveniently, all used .dlls must be imported and found at the same place as the compiled .exe file. This may be fixed in upcoming versions. 
+
+When running program, use the -config flag and specify the configuration xml, for exampe - "osgExample.exe -config single.xml". 
+
+
+
+This is a project in course TNM094 at Linköpings University where the project group are to, by using parts of a written code base, develop a role-playing-game (RPG) for a dome-theatre using mobile devices as controllers. 
