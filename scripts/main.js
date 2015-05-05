@@ -9,13 +9,18 @@ var currentInvitation = null;
 
 var role = '';
 
+var currentShieldVal = 0.5;
+var currentTurretVal = 0.5;
+var currentEngineVal = 0.5;
+
+var maxPower = 1.0;
 
 function init() {
 	console.log("Application started");
 	
 	// Create configuration object
 	var config = {};
-	config.host = "192.168.1.64";//"85.228.182.184";//
+	config.host = "85.228.182.184";
 	config.port = 8888;
 	config.zone = "BasicExamples";
 	config.debug = true;
@@ -173,6 +178,14 @@ this.onButtonClick = function(e) {
 			}, 20);
 			break;
 			
+		case 'myRange':
+			
+			var _shieldVal = $('input[name=shieldSlider]').val();
+			
+			obj.inputShieldVal = 0;
+			
+			break;
+			
 		default: 
 			e.preventDefault();
 			break;
@@ -180,6 +193,74 @@ this.onButtonClick = function(e) {
 
 	return false;
 }
+
+// updade power values based on engineer input
+function updateShield(val) {
+
+	var powerLeft = maxPower - val;
+	
+	var newTurret = powerLeft/2;
+	var newEngine = powerLeft-newTurret;
+	
+	setPowerValues(val, newTurret, newEngine);
+}
+
+function updateTurret(val) {
+
+	var powerLeft = maxPower - val;
+	
+	var newShield = powerLeft/2;
+	var newEngine = powerLeft-newShield;
+	
+	setPowerValues(newShield, val, newEngine);
+}
+
+function updateEngine(val) {
+
+	var powerLeft = maxPower - val;
+	
+	var newShield = powerLeft/2;
+	var newTurret = powerLeft-newShield;
+	
+	setPowerValues(newShield, newTurret, val);
+}
+
+function setPowerValues(_shield, _turret, _engine){
+
+	//set new values and
+	//make sure there aren't any casting conflicts
+	if 		(_shield == 1) 	currentShieldVal = 0.999;
+	else if (_shield == 0) 	currentShieldVal = 0.001;
+	else 					currentShieldVal = _shield;
+	
+	if 		(_turret == 1)	currentTurretVal = 0.999;			
+	else if (_turret == 0) 	currentTurretVal = 0.001;
+	else 					currentTurretVal = _turret;
+	
+	if 		(_engine == 1) 	currentEngineVal = 0.999;
+	else if (_engine == 0) 	currentEngineVal = 0.001;
+	else 					currentEngineVal = _engine;
+	
+	//position slider handles correctly
+	document.getElementById('shieldSlide').value=_shield;
+	document.getElementById('turretSlide').value=_turret;
+	document.getElementById('engineSlide').value=_engine;
+
+	//send new values to server
+	sendEnginerValues(currentShieldVal, currentTurretVal, currentEngineVal);
+}
+
+// send engineer values to server
+function sendEnginerValues(_shield, _turret, _engine) {
+	
+	var obj = {};
+	obj.inputShield = parseFloat(_shield);
+	obj.inputTurret = parseFloat(_turret);
+	obj.inputEngine = parseFloat(_engine);
+	
+	sendItem('EngineerControlEvent', obj);
+}
+
 
 var selected = false;
 

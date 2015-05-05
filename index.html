@@ -144,24 +144,21 @@
 				</div>
 			</div>
 			
-			<div id='engineerView'>
-				<div id='shields' style='width: 100%; height: 30%;'>
-					<center>
-						<h2> Shield power </h2> 
-						<input type="range" id="myRange" value="20">
-					</center>
+			<!-- class="engineerPanel" -->
+			
+			<div id="engineerView">
+				<div class="shieldBox">
+					<h2 class="centerTitle"> Shield </h2>
+					<input id="shieldSlide" type="range" min="0.0" max="1.0" value="0.5" step="0.01" onchange="updateShield(this.value);">
+					<!-- <input type="text" id="textInput" value="">  -->
 				</div>
-				<div id='guns' style='width: 100%; height: 30%; margin-top: 10px;'>
-					<center>
-						<h2> Gun power </h2> 
-						<input type="range" id="myRange" value="20">
-					</center>
+				<div class="turretBox">
+					<h2 class="centerTitle"> Guns </h2> 
+					<input id="turretSlide" type="range" min="0.0" max="1.0" value="0.5" step="0.01" onchange="updateTurret(this.value);">
 				</div>
-				<div id='engine' style='width: 100%; height: 30%; margin-top: 10px;'>
-					<center>
-						<h2> Engine power </h2> 
-						<input type="range" id="myRange" value="20">
-					</center>
+				<div class="engineBox">
+					<h2 class="centerTitle"> Engine </h2> 
+					<input id="engineSlide" type="range" min="0.0" max="1.0" value="0.5" step="0.01" onchange="updateEngine(this.value);">
 				</div>
 			</div>
 			
