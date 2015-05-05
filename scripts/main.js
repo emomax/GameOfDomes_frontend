@@ -32,6 +32,8 @@ function init() {
 	sfs.addEventListener(SFS2X.SFSEvent.CONNECTION, onConnection, this);
 	sfs.addEventListener(SFS2X.SFSEvent.LOGIN, onLogin, this);
 	sfs.addEventListener(SFS2X.SFSEvent.ROOM_JOIN, onRoomJoin, this);
+	sfs.addEventListener(SFS2X.SFSEvent.EXTENSION_RESPONSE, onExtensionResponse, this);
+
 	
 	// Event listeners to implementation
 	//sfs.addEventListener(SFS2X.SFSEvent.)
@@ -64,6 +66,27 @@ function onRoomJoin(event) {
 	document.getElementById('mainView').style.display = 'none';
 	document.getElementById('roleView').style.display = 'inline';
 	window.scrollTo(1, 0);
+}
+
+function onExtensionResponse(event) {
+	console.log("Got an extension response from server. What may it be?");
+	
+	switch (event.cmd) {
+		case "RoleConfirmation":
+		
+			break;
+		case "RoleUpdate":
+		
+			break;
+		
+	}
+	
+	if (event.cmd == "RoleConfirmation") {
+		
+	}
+	
+	
+	
 }
 
 var timeoutUp, timeoutDown, timeoutLeft, timeoutRight, timeoutThrust, timeoutRot;
