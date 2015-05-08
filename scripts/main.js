@@ -1,6 +1,6 @@
+//Game of Domes scripts
+
 var LOBBY_ROOM_NAME = "The Lobby";
-var USERVAR_COUNTRY = "country";
-var USERVAR_RANKING = "rank";
 
 var sfs = null;
 var currentGameStarted = false;
@@ -9,11 +9,19 @@ var currentInvitation = null;
 
 var role = '';
 
-var currentShieldVal = 0.5;
-var currentTurretVal = 0.5;
-var currentEngineVal = 0.5;
-
+//total power for the engineer
 var maxPower = 1.0;
+
+//local variables to store the input untill it's sent
+var isFiring = false;
+var isThrusting = false;
+
+var rotX = 0;
+var rotY = 0;
+
+var currentShieldVal = 0;
+var currentTurretVal = 0;
+var currentEngineVal = 0;
 
 function init() {
 	console.log("Application started");
@@ -42,10 +50,10 @@ function init() {
 	sfs.connect();
 }
 
+//server log on connection
 function onConnection(event) {
 	if (event.success) 	{
 		console.log("Connected to SmartFoxServer 2X!\nAttempting to login as DomeClient..");
-	
 	}
 	else {
 		var error = "Connection failed: " + (event.errorMessage ? event.errorMessage + " (code " + event.errorCode + ")" : "Is the server running at all?");
@@ -53,13 +61,14 @@ function onConnection(event) {
 	}
 }
 
+//joina room when successfully logged in
 function onLogin(event) {
 	console.log("Logged in!\nAttempting to join room 'The Lobby'");
 	
 	sfs.send(new SFS2X.Requests.System.JoinRoomRequest("The Lobby"));
 }
 
-
+//dislpay role view when successfully joined room
 function onRoomJoin(event) {
 	alert('Successfully logged in!');
 	console.log("Joined room The Lobby!");
@@ -83,18 +92,21 @@ function onExtensionResponse(event) {
 	
 	if (event.cmd == "RoleConfirmation") {
 		
-	}
-	
-	
-	
+	}	
 }
 
 var timeoutUp, timeoutDown, timeoutLeft, timeoutRight, timeoutThrust, timeoutRot;
 var originX, originY;
 var inputRotX, inputRotY;
 var touchingCanvas = false;
+
+//joystick handle
 var img = new Image();
 img.src = 'images/joystick.png';
+
+//joystick background image
+var joyBackImg = new Image();
+joyBackImg.src = 'images/emptybutton.png';
 
 this.onButtonClick = function(e) {
 	e.preventDefault();
@@ -113,43 +125,38 @@ this.onButtonClick = function(e) {
 			inputRotY = (originY - _y) / (canvas.height / 2);
 			inputRotX =  (_x - originX) / (canvas.width / 2);
 			
-			/*
-			// Deprecated test to see which values to pass,
-			// parsing the sent value from float to hexadecimal
-			
-			var fadeValue = Math.sqrt(inputRotY * inputRotY + inputRotX * inputRotX);
-			if (fadeValue > 1) fadeValue = 0.9999;
-			
-				
-			// Draw something that looks 'ok'
-			var col = floatToHexa(fadeValue * 0.4);			
-			*/
-			
+			//set background color (no background)
 			col = "#333";
 			ctx.rect(0,0,canvas.width, canvas.height);			
-			ctx.fillStyle = col;//'#000';
+			ctx.fillStyle = 'rgba(0,0,0,1)'; 
 			ctx.fill();
-					
+			
+			//draw joystick background
+			ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
+			
+			//draw joystick line
 			ctx.beginPath();
 			ctx.moveTo(originX, originY);
-			ctx.lineTo(_x, _y);
+			ctx.lineTo(_x, _y);	
+			ctx.lineWidth = 3;
+			ctx.strokeStyle = 'rgba(0,0,0,1)';
 			ctx.stroke();
 			
-			ctx.drawImage(img, _x - img.height/2, _y - img.height/2);
-			
+			//joystick button image
+			ctx.drawImage(img, _x - img.height/2, _y - img.height/2, img.width, img.height);
+
+			//break if out of canvas bounds 
 			if (_y > canvas.height || _x > canvas.width) break;
 			
-			
-			// handle possible infinity cases
-			
-			
+			//check every 20 milisec for steering input
 			if (!touchingCanvas) {
 				touchingCanvas = true;
 				
 				timeoutRot = setInterval(function() {
+					
 					e.preventDefault();
 					
-							
+					//prevent int casting problems
 					if (inputRotY > 1) inputRotY = 0.99;
 					if (inputRotX > 1) inputRotX = 0.99;
 					if (inputRotY < -1) inputRotY = -0.99;
@@ -157,56 +164,33 @@ this.onButtonClick = function(e) {
 					if (inputRotX == 0) inputRotX = 0.0001;
 					if (inputRotY == 0) inputRotY = 0.0001;
 					
-					var obj = {};
-						obj.inputRotY = inputRotY; // inverted due to axis orientation (-1);
-						obj.inputRotX = inputRotX; 
-						
-					if (role == 'pilot') {
-						obj.inputForward = false;
-						obj.inputBackward = false;
-						sendItem("PilotControlEvent", obj);
-					} else {
-						obj.isFiring = false;
-						sendItem("GunnerControlEvent", obj);
-						
-					}
-					
+					//store the rotation locally in order to send it later
+					rotX = inputRotX;
+					rotY = inputRotY;
+
 				}, 20);
 			}
-			//alert('touching: (' + _x + ", " + _y + ")");
 			break;
-						
+		
+		//thrust or fire button is clicked
 		case 'thrustAndFire':
+		
+			//check every 20 milisec for fire/thrust input
 			timeoutThrust = setInterval(function() {
-				//e.target.style.background = '#0000ff';
+				
+				//change button visual to indicate press
 				if (role=='pilot')
 					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward.png')";
 				else
 					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire.png')"; 
-					
 				
-				var obj = {};
-					obj.inputRotY = 0.001;
-					obj.inputRotX = 0.001;
-					
-				if (role == 'pilot') {
-					obj.inputForward = true;
-					obj.inputBackward = false;
-					sendItem("PilotControlEvent", obj);
-				} else {
-					obj.isFiring = true;
-					sendItem('GunnerControlEvent', obj);
-				}
-				
+				//register fire/thrust input
+				if (role == 'pilot')
+					isThrusting = true;
+				else
+					isFiring = true;
+	
 			}, 20);
-			break;
-			
-		case 'myRange':
-			
-			var _shieldVal = $('input[name=shieldSlider]').val();
-			
-			obj.inputShieldVal = 0;
-			
 			break;
 			
 		default: 
@@ -217,7 +201,40 @@ this.onButtonClick = function(e) {
 	return false;
 }
 
-// updade power values based on engineer input
+//update server every 20 milisec
+timeoutRot = setInterval( sendPilotGunnerValues, 20);
+	
+function sendPilotGunnerValues() {
+	
+	//out object
+	var obj = {};
+	
+	//if role is pilot, send rot and thrust
+	if(role == 'pilot') {
+		obj.inputRotX = rotX;
+		obj.inputRotY = rotY;
+		obj.inputForward = isThrusting;
+		
+		sendItem('PilotControlEvent', obj);
+	}
+	
+	//if role is gunner, send rot and fire
+	else if(role == 'gunner') {
+		obj.inputRotX = rotX;
+		obj.inputRotY = rotY;
+		obj.isFiring = isFiring;
+		
+		sendItem('GunnerControlEvent', obj);
+	}	
+	
+	//reset values
+	isFiring = false;
+	isThrusting = false;
+	rotX = 0.0001;
+	rotY = 0.0001;
+}
+
+//when changing shield slider, update sliders and send new values
 function updateShield(val) {
 
 	var powerLeft = maxPower - val;
@@ -228,6 +245,7 @@ function updateShield(val) {
 	setPowerValues(val, newTurret, newEngine);
 }
 
+//when changing turret slider, update sliders and send new values
 function updateTurret(val) {
 
 	var powerLeft = maxPower - val;
@@ -238,6 +256,7 @@ function updateTurret(val) {
 	setPowerValues(newShield, val, newEngine);
 }
 
+//when changing engine slider, update sliders and send new values
 function updateEngine(val) {
 
 	var powerLeft = maxPower - val;
@@ -250,8 +269,7 @@ function updateEngine(val) {
 
 function setPowerValues(_shield, _turret, _engine){
 
-	//set new values and
-	//make sure there aren't any casting conflicts
+	//set new values and make sure there aren't any casting conflicts
 	if 		(_shield == 1) 	currentShieldVal = 0.999;
 	else if (_shield == 0) 	currentShieldVal = 0.001;
 	else 					currentShieldVal = _shield;
@@ -334,7 +352,11 @@ this.onButtonUp = function(e) {
 					ctx.rect(0,0,width, height);
 					ctx.fillStyle='#000';
 					ctx.fill();
-			
+					
+					//draw joystick background
+					ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
+					
+					//draw joystick handle
 					ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
 					
 					//canvas.addEventListener('touchstart', onButtonClick);
@@ -376,10 +398,13 @@ this.onButtonUp = function(e) {
 					originY = height / 2;
 					
 					ctx.rect(0,0,width, height);
-					ctx.fillStyle='#333';
+					ctx.fillStyle='rgba(0,0,0,1)';
 					ctx.fill();
 					
+					//draw joystick background
+					ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
 					
+					//draw joystick handle
 					ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
 					
 					//canvas.addEventListener('touchstart', onButtonClick);
@@ -413,11 +438,15 @@ this.onButtonUp = function(e) {
 				
 			// Draw something that looks 'ok'
 			ctx.rect(0,0,canvas.width, canvas.height);
-			ctx.fillStyle='#333';
+			ctx.fillStyle='rgba(0,0,0,1)';
 			ctx.fill();
 			
+			//draw joystick background
+			ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
 			
+			//draw joystick handle
 			ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
+			
 			break;
 			
 		default:
@@ -501,8 +530,8 @@ function floatToHexa(val) {
 }
 
 function getNewName() {
-	var firstnames = ["Jessie", "Drax", "Star-lord", "Mario", "Peach", "Piggy", "Max", "Torsten", "Henrietta", "Bock"];
-	var surnames = [" the Formidable", " the Relinquisher", " of Doom", " the Domebringer", " the Destroyer", " of Many Treats", " of Self-Disrespect"];
+	var firstnames = ["Jessie", "Drax", "Star-lord", "Mario", "Peach", "Piggy", "Max", "Torsten", "Henrietta", "Bock", "Tucker", "Mommy", "Daddy", "Death", "Herald"];
+	var surnames = [" the Formidable", " the Relinquisher", " of Doom", " the Domebringer", " the Destroyer", " of Many Treats", " of Self-Disrespect", " Mc Donald", " of Destiny"];
 	
 	return firstnames[Math.floor(Math.random() * firstnames.length)] + surnames[Math.floor(Math.random() * surnames.length)];	
 }
