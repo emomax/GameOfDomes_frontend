@@ -8,6 +8,7 @@ var invitationsQueue = [];
 var currentInvitation = null;
 
 var role = '';
+var roleSet = false;
 
 //total power for the engineer
 var maxPower = 1.0;
@@ -23,12 +24,16 @@ var currentShieldVal = 0;
 var currentTurretVal = 0;
 var currentEngineVal = 0;
 
+var engiTaken = false;
+var gunnerTaken = false;
+var pilotTaken = false;
+
 function init() {
 	console.log("Application started");
 	
 	// Create configuration object
 	var config = {};
-	config.host = "85.228.182.184";
+	config.host = "192.168.1.64";
 	config.port = 8888;
 	config.zone = "BasicExamples";
 	config.debug = true;
@@ -39,12 +44,7 @@ function init() {
 	// Add event listeners
 	sfs.addEventListener(SFS2X.SFSEvent.CONNECTION, onConnection, this);
 	sfs.addEventListener(SFS2X.SFSEvent.LOGIN, onLogin, this);
-	sfs.addEventListener(SFS2X.SFSEvent.ROOM_JOIN, onRoomJoin, this);
 	sfs.addEventListener(SFS2X.SFSEvent.EXTENSION_RESPONSE, onExtensionResponse, this);
-
-	
-	// Event listeners to implementation
-	//sfs.addEventListener(SFS2X.SFSEvent.)
 	
 
 	sfs.connect();
@@ -63,35 +63,58 @@ function onConnection(event) {
 
 //joina room when successfully logged in
 function onLogin(event) {
-	console.log("Logged in!\nAttempting to join room 'The Lobby'");
+	console.log("Logged in!\n'");
+	document.getElementById('mainView').style.display = 'none';
+	document.getElementById('roleView').style.display = 'inline';
+	window.scrollTo(1, 0);
 	
-	sfs.send(new SFS2X.Requests.System.JoinRoomRequest("The Lobby"));
+	//sfs.send(new SFS2X.Requests.System.JoinRoomRequest("The Lobby"));
 }
 
 //dislpay role view when successfully joined room
 function onRoomJoin(event) {
 	alert('Successfully logged in!');
 	console.log("Joined room The Lobby!");
-	document.getElementById('mainView').style.display = 'none';
-	document.getElementById('roleView').style.display = 'inline';
-	window.scrollTo(1, 0);
 }
 
 function onExtensionResponse(event) {
-	console.log("Got an extension response from server. What may it be?");
+	console.log("Got an extension response from server. CMD = " + event.cmd);
+	
+	var params = event.params;
 	
 	switch (event.cmd) {
 		case "RoleConfirmation":
-		
+			if (!params.confirmed) {
+				alert ("That role was already taken!");
+				role = '';
+			} else {
+				//alert('Role set to ' + role + '!');
+				roleSet = true;
+			}
+			
+			updateRoleAvailability(engiTaken, gunnerTaken, pilotTaken);
 			break;
 		case "RoleUpdate":
-		
+			//alert('event RoleUpdate');
+			var engi = params.EngineerTaken;
+			var pilot = params.PilotTaken;
+			var gunner = params.GunnerTaken;
+			
+			updateRoleAvailability(engi, gunner, pilot);
+			
+			break;
+		case "GameEvent":
+			if (roleSet)
+				enterGame();
+			break;
+
+		default:
+			// probably a server response not concerning us
 			break;
 		
 	}
 	
 	if (event.cmd == "RoleConfirmation") {
-		
 	}	
 }
 
@@ -202,7 +225,7 @@ this.onButtonClick = function(e) {
 }
 
 //update server every 20 milisec
-timeoutRot = setInterval( sendPilotGunnerValues, 20);
+//timeoutRot = setInterval( sendPilotGunnerValues, 20);
 	
 function sendPilotGunnerValues() {
 	
@@ -312,111 +335,47 @@ this.onButtonUp = function(e) {
 		
 		case 'engineer':
 				if (!selected) {
-					setSelected('engineer');
 					selected = true;
 					obj.selectedRole = 'Engineer';
 					sendItem('ChooseClassHandler', obj);
+					
+					role = 'engineer';
+					
+					//alert("waiting for confirmation..");
+					
+					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
+					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
+					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
 				}
-				else {
-					document.getElementById('roleView').style.display = 'none';
-					document.getElementById('engineerView').style.display = 'inline';
-					window.scrollTo(1, 0);
-				}		
 				break;
 		case 'pilot':
 				if (!selected) {
-					setSelected('pilot');
 					selected = true;
 					obj.selectedRole = 'Pilot';
 					sendItem('ChooseClassHandler', obj);
-				}
-				else {
-					document.getElementById('roleView').style.display = 'none';
-					document.getElementById('pilotView').style.display = 'inline';
 					
-					var container = document.getElementById('pilotContainer');
-					var cs = getComputedStyle(container);
+					role = 'pilot';
 					
-					var width = parseInt(cs.getPropertyValue('width'), 10);
-					var height = parseInt(cs.getPropertyValue('height'), 10);
+					//alert("waiting for confirmation..");
 					
-					var canvas = document.getElementById('pilotCanvas');
-					var ctx = canvas.getContext('2d');
-					
-					canvas.width = width;
-					canvas.height = height;
-					
-					originX = width / 2;
-					originY = height / 2;
-					
-					ctx.rect(0,0,width, height);
-					ctx.fillStyle='#000';
-					ctx.fill();
-					
-					//draw joystick background
-					ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
-					
-					//draw joystick handle
-					ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
-					
-					//canvas.addEventListener('touchstart', onButtonClick);
-					canvas.addEventListener('touchmove', onButtonClick);
-					canvas.addEventListener('touchend', onButtonUp);
-					
-					document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
-					document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
-					
-					alert('Canvas width and height: (' + width + ", " + height + ")");
-					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
-					window.scrollTo(1, 0);
+					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
+					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
+					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
 				}
 				break;
 		case 'gunner':
 				if (!selected) {
-					setSelected('gunner');
 					selected = true;
 					obj.selectedRole = 'Gunner';
 					sendItem('ChooseClassHandler', obj);
-				}
-				else {
-					document.getElementById('roleView').style.display = 'none';
-					document.getElementById('pilotView').style.display = 'inline';
-										
-					var container = document.getElementById('pilotContainer');
-					var cs = getComputedStyle(container);
 					
-					var width = parseInt(cs.getPropertyValue('width'), 10);
-					var height = parseInt(cs.getPropertyValue('height'), 10);
+					role = 'gunner';
 					
-					var canvas = document.getElementById('pilotCanvas');
-					var ctx = canvas.getContext('2d');
+					//alert("waiting for confirmation..");
 					
-					canvas.width = width;
-					canvas.height = height;
-					
-					originX = width / 2;
-					originY = height / 2;
-					
-					ctx.rect(0,0,width, height);
-					ctx.fillStyle='rgba(0,0,0,1)';
-					ctx.fill();
-					
-					//draw joystick background
-					ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
-					
-					//draw joystick handle
-					ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
-					
-					//canvas.addEventListener('touchstart', onButtonClick);
-					canvas.addEventListener('touchmove', onButtonClick);
-					canvas.addEventListener('touchend', onButtonUp);
-					
-					document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
-					document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
-					
-					alert('Canvas width and height: (' + width + ", " + height + ")");
-					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
-					window.scrollTo(1, 0);
+					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
+					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
+					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
 				}
 			break;
 		
@@ -465,14 +424,12 @@ this.attemptLogin = function(e) {
 		var uName = userName.value;	
 		var isSent = sfs.send(new SFS2X.Requests.System.LoginRequest(uName));
 	} else {
-		var uName = getNewName();
-		alert('Sorry, your username is too short!');
-		alert ('.. so we gave you a another nickname: \n' + uName);
-		
+		var uName = getNewName();		
 		var isSent = sfs.send(new SFS2X.Requests.System.LoginRequest(uName));
 		//document.getElementById("userName").value = "";
 	}
 	
+		alert('Logged in as: ' + uName);
 }
 
 // NETWORK HANDLING
@@ -491,6 +448,143 @@ function makeId() {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
 
     return text;
+}
+
+function updateRoleAvailability(engi, gunner, pilot) {
+	document.getElementById('engineer').style.backgroundImage = "url('images/engi_available2.png')";
+	document.getElementById('gunner').style.backgroundImage = "url('images/gunner_available2.png')";
+	document.getElementById('pilot').style.backgroundImage = "url('images/pilot_available2.png')";
+	
+	//alert('Update: engiTaken=' + engi + ", gunnerTaken=" + gunner + ", pilotTaken=" + pilot);
+	
+	engiTaken = engi;
+	gunnerTaken = gunner;
+	pilotTaken = pilot;
+	
+	if (engiTaken) {
+		if (role == 'engineer' && roleSet)
+			document.getElementById('engineer').style.backgroundImage = "url('images/engi_chosen2.png')";		
+		else {
+			document.getElementById('engineer').style.backgroundImage = "url('images/engi_taken2.png')";					
+		}
+	}
+	else
+		document.getElementById('engineer').addEventListener('touchend', onButtonUp);
+	
+	if (gunnerTaken) {
+		if (role == 'gunner' && roleSet)
+			document.getElementById('gunner').style.backgroundImage = "url('images/gunner_chosen2.png')";		
+		else
+			document.getElementById('gunner').style.backgroundImage = "url('images/gunner_taken2.png')";		
+	}
+	else
+		document.getElementById('gunner').addEventListener('touchend', onButtonUp);
+	
+	if (pilotTaken) {
+		if (role == 'pilot' && roleSet)
+			document.getElementById('pilot').style.backgroundImage = "url('images/pilot_chosen2.png')";	
+		else 
+			document.getElementById('pilot').style.backgroundImage = "url('images/pilot_taken2.png')";	
+	}
+	else
+		document.getElementById('pilot').addEventListener('touchend', onButtonUp);
+}
+
+function enterGame() {
+	alert('Buckle up, game is starting!');
+	
+	switch (role) {
+		case 'engineer':
+			document.getElementById('roleView').style.display = 'none';
+			document.getElementById('engineerView').style.display = 'inline';
+			window.scrollTo(1, 0);
+			break;
+			
+		case 'gunner':
+			timeoutRot = setInterval( sendPilotGunnerValues, 20);
+			document.getElementById('roleView').style.display = 'none';
+			document.getElementById('pilotView').style.display = 'inline';
+								
+			var container = document.getElementById('pilotContainer');
+			var cs = getComputedStyle(container);
+			
+			var width = parseInt(cs.getPropertyValue('width'), 10);
+			var height = parseInt(cs.getPropertyValue('height'), 10);
+			
+			var canvas = document.getElementById('pilotCanvas');
+			var ctx = canvas.getContext('2d');
+			
+			canvas.width = width;
+			canvas.height = height;
+			
+			originX = width / 2;
+			originY = height / 2;
+			
+			ctx.rect(0,0,width, height);
+			ctx.fillStyle='rgba(0,0,0,1)';
+			ctx.fill();
+			
+			//draw joystick background
+			ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
+			
+			//draw joystick handle
+			ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
+			
+			//canvas.addEventListener('touchstart', onButtonClick);
+			canvas.addEventListener('touchmove', onButtonClick);
+			canvas.addEventListener('touchend', onButtonUp);
+			
+			document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
+			document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
+			
+			alert('Canvas width and height: (' + width + ", " + height + ")");
+			document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
+			window.scrollTo(1, 0);
+			break;
+			
+		case 'pilot':
+			timeoutRot = setInterval( sendPilotGunnerValues, 20);
+			document.getElementById('roleView').style.display = 'none';
+			document.getElementById('pilotView').style.display = 'inline';
+			
+			var container = document.getElementById('pilotContainer');
+			var cs = getComputedStyle(container);
+			
+			var width = parseInt(cs.getPropertyValue('width'), 10);
+			var height = parseInt(cs.getPropertyValue('height'), 10);
+			
+			var canvas = document.getElementById('pilotCanvas');
+			var ctx = canvas.getContext('2d');
+			
+			canvas.width = width;
+			canvas.height = height;
+			
+			originX = width / 2;
+			originY = height / 2;
+			
+			ctx.rect(0,0,width, height);
+			ctx.fillStyle='#000';
+			ctx.fill();
+			
+			//draw joystick background
+			ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
+			
+			//draw joystick handle
+			ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
+			
+			//canvas.addEventListener('touchstart', onButtonClick);
+			canvas.addEventListener('touchmove', onButtonClick);
+			canvas.addEventListener('touchend', onButtonUp);
+			
+			document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
+			document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
+			
+			alert('Canvas width and height: (' + width + ", " + height + ")");
+			document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
+			window.scrollTo(1, 0);
+			break;		
+	}
+	
 }
 
 function setSelected(_role) {
