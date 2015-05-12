@@ -335,6 +335,13 @@ this.onButtonUp = function(e) {
 		
 		case 'engineer':
 				//if (!selected) {
+				if (roleSet && role == 'engineer') {
+					var obj = {};
+					roleSet = false;
+					role = '';
+					sendItem("UnChooseClassHandler", obj);
+				}
+				else {
 					selected = true;
 					obj.selectedRole = 'Engineer';
 					sendItem('ChooseClassHandler', obj);
@@ -343,13 +350,19 @@ this.onButtonUp = function(e) {
 					
 					//alert("waiting for confirmation..");
 					
-					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
-					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
-					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
-			//	}
+				}
+				document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
+				document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
+				document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
 				break;
 		case 'pilot':
-				//if (!selected) {
+				if (roleSet && role == 'pilot') {
+					var obj = {};
+					roleSet = false;
+					role = '';
+					sendItem("UnChooseClassHandler", obj);
+				}
+				else {
 					selected = true;
 					obj.selectedRole = 'Pilot';
 					sendItem('ChooseClassHandler', obj);
@@ -358,13 +371,20 @@ this.onButtonUp = function(e) {
 					
 					//alert("waiting for confirmation..");
 					
-					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
-					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
-					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
-			//	}
+				}
+				document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
+				document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
+				document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
 				break;
 		case 'gunner':
-			//	if (!selected) {
+			//	i
+				if (roleSet && role == 'gunner') {
+					var obj = {};
+					roleSet = false;
+					role = '';
+					sendItem("UnChooseClassHandler", obj);
+				}
+				else {
 					selected = true;
 					obj.selectedRole = 'Gunner';
 					sendItem('ChooseClassHandler', obj);
@@ -373,10 +393,10 @@ this.onButtonUp = function(e) {
 					
 					//alert("waiting for confirmation..");
 					
-					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
-					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
-					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
-			//	}
+				}
+				document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
+				document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
+				document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
 			break;
 		
 		case 'thrustAndFire':			
@@ -468,29 +488,38 @@ function updateRoleAvailability(engi, gunner, pilot) {
 	pilotTaken = pilot;
 	
 	if (engiTaken) {
-		if (role == 'engineer' && roleSet)
+		if (role == 'engineer' && roleSet) {
 			document.getElementById('engineer').style.backgroundImage = "url('images/engi_chosen2.png')";		
+			document.getElementById('engineer').addEventListener('touchend', onButtonUp);
+		}
 		else {
 			document.getElementById('engineer').style.backgroundImage = "url('images/engi_taken2.png')";					
 		}
 	}
-	else
+	else {
 		document.getElementById('engineer').addEventListener('touchend', onButtonUp);
+	}
 	
 	if (gunnerTaken) {
-		if (role == 'gunner' && roleSet)
+		if (role == 'gunner' && roleSet) {
 			document.getElementById('gunner').style.backgroundImage = "url('images/gunner_chosen2.png')";		
-		else
+			document.getElementById('gunner').addEventListener('touchend', onButtonUp);
+		}
+		else {
 			document.getElementById('gunner').style.backgroundImage = "url('images/gunner_taken2.png')";		
+		}
 	}
 	else
 		document.getElementById('gunner').addEventListener('touchend', onButtonUp);
 	
 	if (pilotTaken) {
-		if (role == 'pilot' && roleSet)
+		if (role == 'pilot' && roleSet) {
 			document.getElementById('pilot').style.backgroundImage = "url('images/pilot_chosen2.png')";	
-		else 
+			document.getElementById('pilot').addEventListener('touchend', onButtonUp);
+		}
+		else {
 			document.getElementById('pilot').style.backgroundImage = "url('images/pilot_taken2.png')";	
+		}
 	}
 	else
 		document.getElementById('pilot').addEventListener('touchend', onButtonUp);
