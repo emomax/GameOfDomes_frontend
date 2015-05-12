@@ -334,7 +334,7 @@ this.onButtonUp = function(e) {
 	switch (e.target.id) {
 		
 		case 'engineer':
-				if (!selected) {
+				//if (!selected) {
 					selected = true;
 					obj.selectedRole = 'Engineer';
 					sendItem('ChooseClassHandler', obj);
@@ -346,10 +346,10 @@ this.onButtonUp = function(e) {
 					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
 					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
 					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
-				}
+			//	}
 				break;
 		case 'pilot':
-				if (!selected) {
+				//if (!selected) {
 					selected = true;
 					obj.selectedRole = 'Pilot';
 					sendItem('ChooseClassHandler', obj);
@@ -361,10 +361,10 @@ this.onButtonUp = function(e) {
 					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
 					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
 					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
-				}
+			//	}
 				break;
 		case 'gunner':
-				if (!selected) {
+			//	if (!selected) {
 					selected = true;
 					obj.selectedRole = 'Gunner';
 					sendItem('ChooseClassHandler', obj);
@@ -376,7 +376,7 @@ this.onButtonUp = function(e) {
 					document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
 					document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
 					document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
-				}
+			//	}
 			break;
 		
 		case 'thrustAndFire':			
@@ -456,6 +456,12 @@ function updateRoleAvailability(engi, gunner, pilot) {
 	document.getElementById('pilot').style.backgroundImage = "url('images/pilot_available2.png')";
 	
 	//alert('Update: engiTaken=' + engi + ", gunnerTaken=" + gunner + ", pilotTaken=" + pilot);
+	
+	// Remove eventlisteners and add those that are available.
+
+	document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
+	document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
+	document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
 	
 	engiTaken = engi;
 	gunnerTaken = gunner;
