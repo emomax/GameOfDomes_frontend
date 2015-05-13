@@ -462,7 +462,7 @@ function registerTouchEvent(e) {
 function calculateTouchPercent(e, canvas) {
 
 	//element distance from top of screen
-	var topOffset = canvas.offsetTop-canvas.scrollTop+canvas.clientTop-canvas.clientHeight/2;
+	var topOffset = canvas.offsetTop; //-canvas.scrollTop+canvas.clientTop-canvas.clientHeight/2;
 
 	//mouse y position
 	var y = e.targetTouches[0].pageY - topOffset;
