@@ -20,10 +20,6 @@ var isThrusting = false;
 var rotX = 0;
 var rotY = 0;
 
-var currentShieldVal = 0;
-var currentTurretVal = 0;
-var currentEngineVal = 0;
-
 var engiTaken = false;
 var gunnerTaken = false;
 var pilotTaken = false;
@@ -38,11 +34,7 @@ barEmpty.src = 'images/EmptySlideBar.png';
 var handle = new Image();
 handle.src = 'images/slider.png';
 
-//input check for engineer slider
-var shieldClicked = false;
-var turretClicked = false;
-var engineClicked = false;
-
+//initiate smartfox and add smartfox event listeners
 function init() {
 	console.log("Application started");
 	
@@ -92,9 +84,11 @@ function onRoomJoin(event) {
 	console.log("Joined room The Lobby!");
 }
 
+//check for server responses, act depending on respons message
 function onExtensionResponse(event) {
 	console.log("Got an extension response from server. CMD = " + event.cmd);
 	
+	//holds the respons message
 	var params = event.params;
 	
 	switch (event.cmd) {
@@ -132,24 +126,22 @@ function onExtensionResponse(event) {
 			break;
 		
 	}
-	
-	if (event.cmd == "RoleConfirmation") {
-	}	
 }
 
+//interval loop variables, and coordinate variables for joystick canvas
 var timeoutUp, timeoutDown, timeoutLeft, timeoutRight, timeoutThrust, timeoutRot;
 var originX, originY;
 var inputRotX, inputRotY;
 var touchingCanvas = false;
 
-//joystick handle
+//load GUI images for pilot/gunner
 var img = new Image();
 img.src = 'images/joystick.png';
 
-//joystick background image
 var joyBackImg = new Image();
 joyBackImg.src = 'images/emptybutton.png';
 
+//touch event for pilot/gunner GUI
 this.onButtonClick = function(e) {
 	e.preventDefault();
 	
@@ -247,6 +239,7 @@ this.onButtonClick = function(e) {
 //update server every 20 milisec
 //timeoutRot = setInterval( sendPilotGunnerValues, 20);
 	
+//update server with new data from pilot/gunner
 function sendPilotGunnerValues() {
 	
 	//out object
@@ -279,6 +272,7 @@ function sendPilotGunnerValues() {
 
 var selected = false;
 
+//touch event function for pilot and gunner
 this.onButtonUp = function(e) {
 	
 	var obj = {};
@@ -406,9 +400,21 @@ this.attemptLogin = function(e) {
 /** mouse and touch events for engineer sliders **/
 /******************************************************************************/
 //check for touch input
+
+//update when touching but not moving
+function onTouchStart(e) {
+	registerTouchEvent(e);
+}
+
+//update when moving along the slider
 function onTouchMove(e) {
+	registerTouchEvent(e);
+}
+
+//Check witch slider is targeted, set and send values
+function registerTouchEvent(e) {
 	
-	e.preventDefault();
+	e.preventDefault(); //prevent standard browser touch event
 	
 	//slider variables
 	var shieldCanvas = document.getElementById('shieldCanvas');
@@ -421,9 +427,7 @@ function onTouchMove(e) {
 	switch(e.target.id) {
 		
 		case 'shieldCanvas':
-			
-			//shieldCanvas.style.backgroundColor="white";
-			
+
 			//calculate pecentage
 			var powerPercent = calculateTouchPercent(e, shieldCanvas);
 			
@@ -478,7 +482,7 @@ function onTouchMove(e) {
 	}
 }
 
-//same as above but for touch events
+//calculate the values for witch the sliders will be set to, takes into account the layout settings
 function calculateTouchPercent(e, canvas) {
 	
 	//element distance from top of screen			
@@ -503,7 +507,7 @@ function calculateTouchPercent(e, canvas) {
 	return sliderPercentage;
 }
 
-//draw engineer sliders
+//draw engineer sliders graphics
 function drawSlider(context, amount) {
 	
 	//handle height (percentage of slider)
@@ -528,7 +532,7 @@ function sendEnginerValues(_shield, _turret, _engine) {
 	
 	var obj = {};
 	
-	//prevent casting problems
+	//prevent cast-to-int problems with server
 	if(_shield >= 1) _shield = 0.999;
 	if(_turret >= 1) _turret = 0.999;
 	if(_engine >= 1) _engine = 0.999;
@@ -649,6 +653,10 @@ function enterGame() {
 			shieldCanvas.addEventListener('touchmove', onTouchMove);
 			turretCanvas.addEventListener('touchmove', onTouchMove);
 			engineCanvas.addEventListener('touchmove', onTouchMove);
+			
+			shieldCanvas.addEventListener('touchstart', onTouchStart);
+			turretCanvas.addEventListener('touchstart', onTouchStart);
+			engineCanvas.addEventListener('touchstart', onTouchStart);
 			
 			break;
 			
