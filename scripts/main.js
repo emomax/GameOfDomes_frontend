@@ -28,12 +28,27 @@ var engiTaken = false;
 var gunnerTaken = false;
 var pilotTaken = false;
 
+//load engineer GUI images
+var barFilled = new Image();
+barFilled.src = 'images/FullSlideBar.png';
+
+var barEmpty = new Image();
+barEmpty.src = 'images/EmptySlideBar.png';
+
+var handle = new Image();
+handle.src = 'images/slider.png';
+
+//input check for engineer slider
+var shieldClicked = false;
+var turretClicked = false;
+var engineClicked = false;
+
 function init() {
 	console.log("Application started");
 	
 	// Create configuration object
 	var config = {};
-	config.host = "192.168.1.64";
+	config.host = "85.228.182.184";
 	config.port = 8888;
 	config.zone = "BasicExamples";
 	config.debug = true;
@@ -90,6 +105,10 @@ function onExtensionResponse(event) {
 			} else {
 				//alert('Role set to ' + role + '!');
 				roleSet = true;
+				
+				//start game. Debug to test engineer view, REMOVE THIS
+					var objTest = {};
+					sendItem('StartGame', objTest);
 			}
 			
 			updateRoleAvailability(engiTaken, gunnerTaken, pilotTaken);
@@ -142,9 +161,10 @@ this.onButtonClick = function(e) {
 			var canvas = document.getElementById('pilotCanvas');
 			var ctx = canvas.getContext('2d');
 			
-			var _x = e.targetTouches[0].pageX- canvas.getBoundingClientRect().left;//e.clientX - canvas.getBoundingClientRect().left;//
-			var _y = e.targetTouches[0].pageY - canvas.getBoundingClientRect().top;// e.clientY - canvas.getBoundingClientRect().top;//targetTouches[0].pageY;
-				
+			//get screen coordinates
+			var _x = e.targetTouches[0].pageX- canvas.getBoundingClientRect().left;
+			var _y = e.targetTouches[0].pageY - canvas.getBoundingClientRect().top;
+			
 			inputRotY = (originY - _y) / (canvas.height / 2);
 			inputRotX =  (_x - originX) / (canvas.width / 2);
 			
@@ -256,75 +276,6 @@ function sendPilotGunnerValues() {
 	rotX = 0.0001;
 	rotY = 0.0001;
 }
-
-//when changing shield slider, update sliders and send new values
-function updateShield(val) {
-
-	var powerLeft = maxPower - val;
-	
-	var newTurret = powerLeft/2;
-	var newEngine = powerLeft-newTurret;
-	
-	setPowerValues(val, newTurret, newEngine);
-}
-
-//when changing turret slider, update sliders and send new values
-function updateTurret(val) {
-
-	var powerLeft = maxPower - val;
-	
-	var newShield = powerLeft/2;
-	var newEngine = powerLeft-newShield;
-	
-	setPowerValues(newShield, val, newEngine);
-}
-
-//when changing engine slider, update sliders and send new values
-function updateEngine(val) {
-
-	var powerLeft = maxPower - val;
-	
-	var newShield = powerLeft/2;
-	var newTurret = powerLeft-newShield;
-	
-	setPowerValues(newShield, newTurret, val);
-}
-
-function setPowerValues(_shield, _turret, _engine){
-
-	//set new values and make sure there aren't any casting conflicts
-	if 		(_shield == 1) 	currentShieldVal = 0.999;
-	else if (_shield == 0) 	currentShieldVal = 0.001;
-	else 					currentShieldVal = _shield;
-	
-	if 		(_turret == 1)	currentTurretVal = 0.999;			
-	else if (_turret == 0) 	currentTurretVal = 0.001;
-	else 					currentTurretVal = _turret;
-	
-	if 		(_engine == 1) 	currentEngineVal = 0.999;
-	else if (_engine == 0) 	currentEngineVal = 0.001;
-	else 					currentEngineVal = _engine;
-	
-	//position slider handles correctly
-	document.getElementById('shieldSlide').value=_shield;
-	document.getElementById('turretSlide').value=_turret;
-	document.getElementById('engineSlide').value=_engine;
-
-	//send new values to server
-	sendEnginerValues(currentShieldVal, currentTurretVal, currentEngineVal);
-}
-
-// send engineer values to server
-function sendEnginerValues(_shield, _turret, _engine) {
-	
-	var obj = {};
-	obj.inputShield = parseFloat(_shield);
-	obj.inputTurret = parseFloat(_turret);
-	obj.inputEngine = parseFloat(_engine);
-	
-	sendItem('EngineerControlEvent', obj);
-}
-
 
 var selected = false;
 
@@ -452,6 +403,150 @@ this.attemptLogin = function(e) {
 		alert('Logged in as: ' + uName);
 }
 
+/** mouse and touch events for engineer sliders **/
+/******************************************************************************/
+
+//check for touch input
+function onTouchMove(e) {
+	
+	e.preventDefault();
+	
+	//slider variables
+	var shieldCanvas = document.getElementById('shieldCanvas');
+	var sCtx = shieldCanvas.getContext('2d');
+	var turretCanvas = document.getElementById('turretCanvas');
+	var tCtx = turretCanvas.getContext('2d');
+	var engineCanvas = document.getElementById('engineCanvas');
+	var eCtx = engineCanvas.getContext('2d');
+	
+	switch(e.target.id) {
+		
+		case 'shieldCanvas':
+			
+			//shieldCanvas.style.backgroundColor="white";
+			
+			//calculate pecentage
+			var powerPercent = calculateTouchPercent(e, shieldCanvas);
+			
+			//update targeted slider
+			drawSlider(sCtx, powerPercent);
+			
+			//calculate remaining powerPercent
+			var remainingPower = (maxPower-powerPercent)/2;
+			
+			//update the other sliders
+			drawSlider(tCtx, remainingPower);
+			drawSlider(eCtx, remainingPower);
+			
+			sendEnginerValues(powerPercent, remainingPower, remainingPower);
+		break;
+		
+		case 'turretCanvas':
+		
+			//calculate pecentage
+			var powerPercent = calculateTouchPercent(e, shieldCanvas);
+			
+			//update targeted slider
+			drawSlider(tCtx, powerPercent);
+			
+			//calculate remaining powerPercent
+			var remainingPower = (maxPower-powerPercent)/2;
+			
+			//update the other sliders
+			drawSlider(sCtx, remainingPower);
+			drawSlider(eCtx, remainingPower);
+			
+			sendEnginerValues(remainingPower, powerPercent, remainingPower);
+		break;
+		
+		case 'engineCanvas':
+			
+			//calculate pecentage
+			var powerPercent = calculateTouchPercent(e, engineCanvas);
+			
+			//update targeted slider
+			drawSlider(eCtx, powerPercent);
+			
+			//calculate remaining powerPercent
+			var remainingPower = (maxPower-powerPercent)/2;
+			
+			//update the other sliders
+			drawSlider(sCtx, remainingPower);
+			drawSlider(tCtx, remainingPower);
+			
+			sendEnginerValues(remainingPower, remainingPower, powerPercent);
+		break;
+	}
+}
+
+//same as above but for touch events
+function calculateTouchPercent(e, canvas) {
+	
+	//element distance from top of screen			
+	var topOffset = canvas.offsetTop-canvas.scrollTop+canvas.clientTop-canvas.clientHeight/2;
+	
+	//mouse y position
+	var y = e.targetTouches[0].pageY - topOffset;
+	
+	//height of element
+	var sliderHeight = canvas.clientHeight;
+	
+	//calculate mouse y percentege of element height
+	var sliderPercentage = y/sliderHeight;
+
+	//turn slider so that bottom is 0% and top is 100%
+	sliderPercentage=1-sliderPercentage;
+	
+	//check if out of bounds
+	if(sliderPercentage < 0) sliderPercentage = 0;
+	if(sliderPercentage > 1) sliderPercentage = 1;
+	
+	return sliderPercentage;
+}
+
+//draw engineer sliders
+function drawSlider(context, amount) {
+	
+	//handle height (percentage of slider)
+	var handleHeight = 0.1;
+
+	//draw empty background
+	context.drawImage(barEmpty, 0, 0,shieldCanvas.width, shieldCanvas.height);
+
+	//draw filled amount
+	context.drawImage(barFilled, 0,
+		shieldCanvas.height-shieldCanvas.height*amount,
+		shieldCanvas.width,shieldCanvas.height*amount);
+	
+	//draw handle
+	context.drawImage(handle, 0, 
+		shieldCanvas.height-shieldCanvas.height*amount-shieldCanvas.height*handleHeight*0.5,
+		shieldCanvas.width, shieldCanvas.height*handleHeight);
+}
+
+// send engineer values to server
+function sendEnginerValues(_shield, _turret, _engine) {
+	
+	var obj = {};
+	
+	//prevent casting problems
+	if(_shield >= 1) _shield = 0.999;
+	if(_turret >= 1) _turret = 0.999;
+	if(_engine >= 1) _engine = 0.999;
+	if(_shield <= 0) _shield = 0.001;
+	if(_turret <= 0) _turret = 0.001;
+	if(_engine <= 0) _engine = 0.001;
+	
+	//set values
+	obj.inputShield = parseFloat(_shield);
+	obj.inputTurret = parseFloat(_turret);
+	obj.inputEngine = parseFloat(_engine);
+	
+	//send
+	sendItem('EngineerControlEvent', obj);
+}
+/******************************************************************************/
+
 // NETWORK HANDLING
 
 function sendItem(ext, obj) {	
@@ -532,7 +627,30 @@ function enterGame() {
 		case 'engineer':
 			document.getElementById('roleView').style.display = 'none';
 			document.getElementById('engineerView').style.display = 'inline';
-			window.scrollTo(1, 0);
+			window.scrollTo(1, 0); //scroll away the adress bar (iphone)
+			
+			//initiate the gui
+			
+			//add variables for each canvas
+			var shieldCanvas = document.getElementById('shieldCanvas');
+			var sCtx = shieldCanvas.getContext('2d');
+
+			var turretCanvas = document.getElementById('turretCanvas');
+			var tCtx = turretCanvas.getContext('2d');
+
+			var engineCanvas = document.getElementById('engineCanvas');
+			var eCtx = engineCanvas.getContext('2d');
+			
+			//draw sliders initially
+			drawSlider(sCtx, 0.333);
+			drawSlider(tCtx, 0.333);
+			drawSlider(eCtx, 0.333);
+
+			//add touch listeners
+			shieldCanvas.addEventListener('touchmove', onTouchMove);
+			turretCanvas.addEventListener('touchmove', onTouchMove);
+			engineCanvas.addEventListener('touchmove', onTouchMove);
+			
 			break;
 			
 		case 'gunner':
