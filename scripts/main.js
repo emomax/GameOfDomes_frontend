@@ -405,7 +405,6 @@ this.attemptLogin = function(e) {
 
 /** mouse and touch events for engineer sliders **/
 /******************************************************************************/
-
 //check for touch input
 function onTouchMove(e) {
 	

@@ -172,8 +172,31 @@ html, body{
 	transform: translate(-50%, -50%);
 } 
 
+.textContainer {
+	float: top;
+	height: 20%;
+	margin: 0;
+	padding: 0;
+	top: 0;
+	left: 0;
+}
+
+.sliderContainer {
+	float: bottom;
+	height: 80%;
+	margin: 0;
+	padding: 0;
+}
+
+.textBox {
+	float: left;
+	width: 30%;
+	height: 100%;
+	margin-left: 2.5%;
+}
+
 .sliderText {
-	
+	text-align: center;
 }
 
 
