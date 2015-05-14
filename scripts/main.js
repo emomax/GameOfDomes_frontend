@@ -101,8 +101,8 @@ function onExtensionResponse(event) {
 				roleSet = true;
 
 				//start game. Debug to test engineer view, REMOVE THIS
-					// var objTest = {};
-					// sendItem('StartGame', objTest);
+					var objTest = {};
+					sendItem('StartGame', objTest);
 			}
 
 			updateRoleAvailability(engiTaken, gunnerTaken, pilotTaken);
@@ -128,8 +128,6 @@ function onExtensionResponse(event) {
 	}
 }
 
-var thrustFireTargeted = false;
-var thrustFireTouchCount = 0;
 
 //!touch event for pilot/gunner GUI
 this.onButtonClick = function(e) {
@@ -173,27 +171,18 @@ this.onButtonClick = function(e) {
 			//break if out of canvas bounds
 			if (_y > canvas.height || _x > canvas.width) break;
 
-			//check every 20 milisec for steering input
-			if (!touchingCanvas) {
-				touchingCanvas = true;
+			//prevent int casting problems
+			if (inputRotY > 1) inputRotY = 0.99;
+			if (inputRotX > 1) inputRotX = 0.99;
+			if (inputRotY < -1) inputRotY = -0.99;
+			if (inputRotX < -1) inputRotX = -0.99;
+			if (inputRotX == 0) inputRotX = 0.0001;
+			if (inputRotY == 0) inputRotY = 0.0001;
 
-				timeoutRot = setInterval(function() {
-					e.preventDefault();
+			//store the rotation locally in order to send it later
+			rotX = inputRotX;
+			rotY = inputRotY;
 
-					//prevent int casting problems
-					if (inputRotY > 1) inputRotY = 0.99;
-					if (inputRotX > 1) inputRotX = 0.99;
-					if (inputRotY < -1) inputRotY = -0.99;
-					if (inputRotX < -1) inputRotX = -0.99;
-					if (inputRotX == 0) inputRotX = 0.0001;
-					if (inputRotY == 0) inputRotY = 0.0001;
-
-					//store the rotation locally in order to send it later
-					rotX = inputRotX;
-					rotY = inputRotY;
-
-				}, 20);
-			}
 			break;
 
 		//thrust or fire button is clicked
@@ -320,25 +309,13 @@ this.onButtonUp = function(e) {
 
 		case 'thrustAndFire':
 			
-			//register release
-			if (role == 'pilot')
-				isThrusting = false;
-			else
-				isFiring = false;
-			
-			//Update button visually
-			if (role=='pilot')
-				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
-			else
-				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
+			//reset button visually and input wise
+			clearThrustFire();
 
 			break;
 
 		case 'pilotCanvas':
 		
-			clearInterval(timeoutRot);
-			touchingCanvas = false;
-
 			var canvas = document.getElementById('pilotCanvas');
 			var ctx = canvas.getContext('2d');
 
@@ -361,6 +338,32 @@ this.onButtonUp = function(e) {
 	}
 
 	return false;
+}
+
+//check if touch point leaves button area
+function onButtonLeave() {
+	clearThrustFire();
+}
+
+//checks if other event occurs
+function onButtonCancel() {
+	clearThrustFire();
+}
+
+//reset thustFire button
+function clearThrustFire() {
+	
+	//register release
+	if (role == 'pilot')
+		isThrusting = false;
+	else
+		isFiring = false;
+	
+	//Update button visually
+	if (role=='pilot')
+		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
+	else
+		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
 }
 
 //! Function for login attempt
@@ -685,6 +688,10 @@ function enterGame() {
 
 			document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
 			document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
+			
+			//use these listeners to prevent locked buttons when touchend isn't registered
+			document.getElementById("thrustAndFire").addEventListener("touchleave", onButtonLeave);
+			document.getElementById("thrustAndFire").addEventListener("touchcancel", onButtonCancel);
 
 			alert('Canvas width and height: (' + width + ", " + height + ")");
 			document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
