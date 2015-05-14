@@ -131,9 +131,8 @@ function onExtensionResponse(event) {
 
 //!touch event for pilot/gunner GUI
 this.onButtonClick = function(e) {
+	
 	e.preventDefault();
-
-	//console.log(e.target.id);
 
 	switch (e.target.id) {
 		case 'pilotCanvas':
@@ -148,7 +147,7 @@ this.onButtonClick = function(e) {
 			inputRotY = (originY - _y) / (canvas.height / 2);
 			inputRotX =  (_x - originX) / (canvas.width / 2);
 
-			//set background color (no background)
+			//set background color
 			col = "#333";
 			ctx.rect(0,0,canvas.width, canvas.height);
 			ctx.fillStyle = 'rgba(0,0,0,1)';
@@ -172,8 +171,8 @@ this.onButtonClick = function(e) {
 			if (_y > canvas.height || _x > canvas.width) break;
 
 			//prevent int casting problems
-			if (inputRotY > 1) inputRotY = 0.99;
-			if (inputRotX > 1) inputRotX = 0.99;
+			if (inputRotY > 1) 	inputRotY = 0.99;
+			if (inputRotX > 1) 	inputRotX = 0.99;
 			if (inputRotY < -1) inputRotY = -0.99;
 			if (inputRotX < -1) inputRotX = -0.99;
 			if (inputRotX == 0) inputRotX = 0.0001;
@@ -183,6 +182,7 @@ this.onButtonClick = function(e) {
 			rotX = inputRotX;
 			rotY = inputRotY;
 
+			
 			break;
 
 		//thrust or fire button is clicked
@@ -209,6 +209,7 @@ this.onButtonClick = function(e) {
 
 	return false;
 }
+
 
 //! Update server with new data from pilot/gunner
 function sendPilotGunnerValues() {
@@ -237,14 +238,12 @@ function sendPilotGunnerValues() {
 		if(!(rotX==0.0001 && rotY==0.0001 && !isFiring))
 			sendItem('GunnerControlEvent', obj);
 	}
-
-	//reset values
-	rotX = 0.0001;
-	rotY = 0.0001;
 }
 
 //! Touch event function for pilot and gunner
 this.onButtonUp = function(e) {
+
+	e.preventDefault();
 
 	var obj = {};
 	switch (e.target.id) {
@@ -329,7 +328,11 @@ this.onButtonUp = function(e) {
 
 			//draw joystick handle
 			ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
-
+			
+			//reset values
+			rotX = 0.0001;
+			rotY = 0.0001;
+			
 			break;
 
 		default:
@@ -683,6 +686,7 @@ function enterGame() {
 			ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
 
 			//canvas.addEventListener('touchstart', onButtonClick);
+			canvas.addEventListener('touchstart', onButtonClick);
 			canvas.addEventListener('touchmove', onButtonClick);
 			canvas.addEventListener('touchend', onButtonUp);
 
