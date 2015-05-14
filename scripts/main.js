@@ -29,7 +29,7 @@ var handle = new Image();
 handle.src = 'images/slider.png';
 
 //interval loop variables, and coordinate variables for joystick canvas
-var timeoutUp, timeoutDown, timeoutLeft, timeoutRight, timeoutThrust, timeoutRot;
+var timeoutUp, timeoutDown, timeoutLeft, timeoutRight, timeoutRot;
 var originX, originY;
 var inputRotX, inputRotY;
 var touchingCanvas = false;
@@ -101,8 +101,8 @@ function onExtensionResponse(event) {
 				roleSet = true;
 
 				//start game. Debug to test engineer view, REMOVE THIS
-					var objTest = {};
-					sendItem('StartGame', objTest);
+					// var objTest = {};
+					// sendItem('StartGame', objTest);
 			}
 
 			updateRoleAvailability(engiTaken, gunnerTaken, pilotTaken);
@@ -128,6 +128,9 @@ function onExtensionResponse(event) {
 	}
 }
 
+var thrustFireTargeted = false;
+var thrustFireTouchCount = 0;
+
 //!touch event for pilot/gunner GUI
 this.onButtonClick = function(e) {
 	e.preventDefault();
@@ -136,7 +139,7 @@ this.onButtonClick = function(e) {
 
 	switch (e.target.id) {
 		case 'pilotCanvas':
-
+			
 			var canvas = document.getElementById('pilotCanvas');
 			var ctx = canvas.getContext('2d');
 
@@ -195,23 +198,19 @@ this.onButtonClick = function(e) {
 
 		//thrust or fire button is clicked
 		case 'thrustAndFire':
+		
+			//change button visual to indicate press
+			if (role=='pilot')
+				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward.png')";
+			else
+				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire.png')";
 
-			//check every 20 milisec for fire/thrust input
-			timeoutThrust = setInterval(function() {
-
-				//change button visual to indicate press
-				if (role=='pilot')
-					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward.png')";
-				else
-					document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire.png')";
-
-				//register fire/thrust input
-				if (role == 'pilot')
-					isThrusting = true;
-				else
-					isFiring = true;
-
-			}, 20);
+			//register fire/thrust input
+			if (role == 'pilot')
+				isThrusting = true;
+			else
+				isFiring = true;
+			
 			break;
 
 		default:
@@ -221,9 +220,6 @@ this.onButtonClick = function(e) {
 
 	return false;
 }
-
-/** TODO: Fix so client doesn't send values when there is nothing to be sent **/
-/******************************************************************************/
 
 //! Update server with new data from pilot/gunner
 function sendPilotGunnerValues() {
@@ -237,7 +233,9 @@ function sendPilotGunnerValues() {
 		obj.inputRotY = rotY;
 		obj.inputForward = isThrusting;
 
-		sendItem('PilotControlEvent', obj);
+		//dont bother sending if no input is given
+		if(!(rotX==0.0001 && rotY==0.0001 && !isThrusting))
+			sendItem('PilotControlEvent', obj);
 	}
 
 	//if role is gunner, send rot and fire
@@ -245,13 +243,13 @@ function sendPilotGunnerValues() {
 		obj.inputRotX = rotX;
 		obj.inputRotY = rotY;
 		obj.isFiring = isFiring;
-
-		sendItem('GunnerControlEvent', obj);
+		
+		//dont bother sending if no input is given
+		if(!(rotX==0.0001 && rotY==0.0001 && !isFiring))
+			sendItem('GunnerControlEvent', obj);
 	}
 
 	//reset values
-	isFiring = false;
-	isThrusting = false;
 	rotX = 0.0001;
 	rotY = 0.0001;
 }
@@ -321,15 +319,23 @@ this.onButtonUp = function(e) {
 			break;
 
 		case 'thrustAndFire':
+			
+			//register release
+			if (role == 'pilot')
+				isThrusting = false;
+			else
+				isFiring = false;
+			
+			//Update button visually
 			if (role=='pilot')
 				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
 			else
 				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
 
-			clearInterval(timeoutThrust);
 			break;
 
 		case 'pilotCanvas':
+		
 			clearInterval(timeoutRot);
 			touchingCanvas = false;
 
