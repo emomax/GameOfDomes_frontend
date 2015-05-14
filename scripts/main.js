@@ -101,8 +101,8 @@ function onExtensionResponse(event) {
 				roleSet = true;
 
 				//start game. Debug to test engineer view, REMOVE THIS
-					var objTest = {};
-					sendItem('StartGame', objTest);
+					// var objTest = {};
+					// sendItem('StartGame', objTest);
 			}
 
 			updateRoleAvailability(engiTaken, gunnerTaken, pilotTaken);
@@ -733,6 +733,7 @@ function enterGame() {
 			ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
 
 			//canvas.addEventListener('touchstart', onButtonClick);
+			canvas.addEventListener('touchstart', onButtonClick);
 			canvas.addEventListener('touchmove', onButtonClick);
 			canvas.addEventListener('touchend', onButtonUp);
 
