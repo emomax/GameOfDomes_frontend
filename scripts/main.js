@@ -1,6 +1,9 @@
 //Game of Domes scripts
 var sfs = null;
 
+//check if commputer or phone is used
+var usingDesktop = false;
+
 var role = '';
 var roleSet = false;
 
@@ -45,6 +48,12 @@ joyBackImg.src = 'images/emptybutton.png';
 //initiate smartfox and add smartfox event listeners
 function init() {
 	console.log("Application started");
+	
+	//detect user device
+	usingDesktop = (typeof window.orientation == 4'undefined');
+	
+	if(usingDesktop)
+		document.getElementById('promptLandscape').style.display = 'none';
 
 	// Create configuration object
 	var config = {};
@@ -60,7 +69,6 @@ function init() {
 	sfs.addEventListener(SFS2X.SFSEvent.CONNECTION, onConnection, this);
 	sfs.addEventListener(SFS2X.SFSEvent.LOGIN, onLogin, this);
 	sfs.addEventListener(SFS2X.SFSEvent.EXTENSION_RESPONSE, onExtensionResponse, this);
-
 
 	sfs.connect();
 }
@@ -563,6 +571,12 @@ function getNewName() {
 	return firstnames[Math.floor(Math.random() * firstnames.length)] + surnames[Math.floor(Math.random() * surnames.length)];
 }
 
+function mouseDown() {
+	
+	
+	console.log("HEJHEJEHEHJJEH");
+}
+
 function updateRoleAvailability(engi, gunner, pilot) {
 	document.getElementById('engineer').style.backgroundImage = "url('images/engi_available2.png')";
 	document.getElementById('gunner').style.backgroundImage = "url('images/gunner_available2.png')";
@@ -575,6 +589,9 @@ function updateRoleAvailability(engi, gunner, pilot) {
 	document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
 	document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
 	document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
+	
+	
+	document.getElementById('pilot').removeEventListener('mousedown', onButtonUp);
 
 	engiTaken = engi;
 	gunnerTaken = gunner;
@@ -583,39 +600,58 @@ function updateRoleAvailability(engi, gunner, pilot) {
 	if (engiTaken) {
 		if (role == 'engineer' && roleSet) {
 			document.getElementById('engineer').style.backgroundImage = "url('images/engi_chosen2.png')";
+			
+			//add touch and mouse listeners to role select items
 			document.getElementById('engineer').addEventListener('touchend', onButtonUp);
+			document.getElementById("engineer").addEventListener("mousedown", onButtonUp);
 		}
 		else {
 			document.getElementById('engineer').style.backgroundImage = "url('images/engi_taken2.png')";
 		}
 	}
 	else {
+		//add touch and mouse listeners to role select items
 		document.getElementById('engineer').addEventListener('touchend', onButtonUp);
+		document.getElementById("engineer").addEventListener("mousedown", onButtonUp);
 	}
 
 	if (gunnerTaken) {
 		if (role == 'gunner' && roleSet) {
 			document.getElementById('gunner').style.backgroundImage = "url('images/gunner_chosen2.png')";
+			
+			
+			//add touch and mouse listeners to role select items
 			document.getElementById('gunner').addEventListener('touchend', onButtonUp);
+			document.getElementById("gunner").addEventListener("mousedown", onButtonUp);
 		}
 		else {
 			document.getElementById('gunner').style.backgroundImage = "url('images/gunner_taken2.png')";
 		}
 	}
-	else
+	else {
+		//add touch and mouse listeners to role select items
 		document.getElementById('gunner').addEventListener('touchend', onButtonUp);
+		document.getElementById("gunner").addEventListener("mousedown", onButtonUp);		
+	}
+		
 
 	if (pilotTaken) {
 		if (role == 'pilot' && roleSet) {
 			document.getElementById('pilot').style.backgroundImage = "url('images/pilot_chosen2.png')";
+			
+			//add touch and mouse listeners to role select items
 			document.getElementById('pilot').addEventListener('touchend', onButtonUp);
+			document.getElementById("pilot").addEventListener("mousedown", onButtonUp);	
 		}
 		else {
 			document.getElementById('pilot').style.backgroundImage = "url('images/pilot_taken2.png')";
 		}
 	}
-	else
+	else {
+		//add touch and mouse listeners to role select items
 		document.getElementById('pilot').addEventListener('touchend', onButtonUp);
+		document.getElementById("pilot").addEventListener("mousedown", onButtonUp);		
+	}
 }
 
 function enterGame() {
