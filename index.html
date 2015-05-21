@@ -10,47 +10,9 @@
 		<script type="text/javascript" src="scripts/main.js"></script>
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
 		
-		<!--[if IE]>
-			<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-		<![endif]-->
-		
+
 		<script type="text/javascript">
-			
-			$(document).ready(function () {
-					window.scrollTo(0,1);
-					
-					var imgToPreload = new Image();
-					imgToPreload.src = "images/fire_pressed.png";
-					
-					document.getElementById('engineer').addEventListener('touchend', onButtonUp);
-					document.getElementById('gunner').addEventListener('touchend', onButtonUp);
-					document.getElementById('pilot').addEventListener('touchend', onButtonUp);
-					
-					/*document.getElementById("rotateBtnLeft").addEventListener('touchstart', onButtonClick, false);
-					document.getElementById("rotateBtnLeft").addEventListener('touchend', onButtonUp, false);
-					document.getElementById("rotateBtnLeft").addEventListener('touchcancel', onButtonUp, false);
-
-					document.getElementById("rotateBtnRight").addEventListener('touchstart', onButtonClick, false);
-					document.getElementById("rotateBtnRight").addEventListener('touchend', onButtonUp, false);
-					document.getElementById("rotateBtnRight").addEventListener('touchcancel', onButtonUp, false);
-
-					document.getElementById("rotateBtnUp").addEventListener('touchstart', onButtonClick, false);
-					document.getElementById("rotateBtnUp").addEventListener('touchend', onButtonUp, false);
-					document.getElementById("rotateBtnUp").addEventListener('touchcancel', onButtonUp, false);
-
-					document.getElementById("rotateBtnDown").addEventListener('touchstart', onButtonClick, false);
-					document.getElementById("rotateBtnDown").addEventListener('touchend', onButtonUp, false);
-					document.getElementById("rotateBtnDown").addEventListener('touchcancel', onButtonUp, false);
-
-					document.getElementById("thrustBtn").addEventListener('touchstart', onButtonClick, false);
-					document.getElementById("thrustBtn").addEventListener('touchend', onButtonUp, false);
-					document.getElementById("thrustBtn").addEventListener('touchcancel', onButtonUp, false);*/
-
-					// setup canvas for steering
-					
-					
-			});
-			
+		
 			var clicked = false;
 			
 			$(document).keydown(function(e) {
@@ -108,7 +70,8 @@
 			});
 		</script>
 	</head>
-	<body onLoad="init()" <!--style= "height: 100%; background-color: black; margin: 0px;"-->>
+	
+	<body onLoad="init()" >
 		
 		<div id="promptLandscape">
 			<center>
@@ -197,9 +160,7 @@
 					<div id="thrustAndFire"> 
 					</div>
 				</div>
-				
-				<!-- <div style="clear: both;"> </div> -->
-				<!-- <div style="clear: both;"></div> -->
+			
 			</div>
 		</div>
 	</body>

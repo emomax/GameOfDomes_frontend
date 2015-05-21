@@ -14,8 +14,8 @@ var maxPower = 1.0;
 var isFiring = false;
 var isThrusting = false;
 
-var rotX = 0;
-var rotY = 0;
+var rotX = 0.0001;
+var rotY = 0.0001;
 
 var engiTaken = false;
 var gunnerTaken = false;
@@ -42,7 +42,7 @@ var img = new Image();
 img.src = 'images/joystick.png';
 
 var joyBackImg = new Image();
-joyBackImg.src = 'images/emptybutton.png';
+joyBackImg.src = 'images/buttonwLine.png';
 
 
 //initiate smartfox and add smartfox event listeners
@@ -50,7 +50,7 @@ function init() {
 	console.log("Application started");
 	
 	//detect user device
-	usingDesktop = (typeof window.orientation == 4'undefined');
+	usingDesktop = (typeof window.orientation == 'undefined');
 	
 	if(usingDesktop)
 		document.getElementById('promptLandscape').style.display = 'none';
@@ -109,8 +109,8 @@ function onExtensionResponse(event) {
 				roleSet = true;
 
 				//start game. Debug to test engineer view, REMOVE THIS
-					// var objTest = {};
-					// sendItem('StartGame', objTest);
+					var objTest = {};
+					sendItem('StartGame', objTest);
 			}
 
 			updateRoleAvailability(engiTaken, gunnerTaken, pilotTaken);
@@ -273,6 +273,7 @@ this.onButtonUp = function(e) {
 				document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
 				document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
 				break;
+				
 		case 'pilot':
 				if (roleSet && role == 'pilot') {
 					var obj = {};
@@ -399,11 +400,17 @@ this.attemptLogin = function(e) {
 
 //update when touching but not moving
 function onTouchStart(e) {
+	
+	console.log(e.target.id);
+	
 	registerTouchEvent(e);
 }
 
 //update when moving along the slider
 function onTouchMove(e) {
+	
+	console.log(e.target.id);
+	
 	registerTouchEvent(e);
 }
 
@@ -485,7 +492,10 @@ function calculateTouchPercent(e, canvas) {
 	var topOffset = canvas.offsetTop; //-canvas.scrollTop+canvas.clientTop-canvas.clientHeight/2;
 
 	//mouse y position
-	var y = e.targetTouches[0].pageY - topOffset;
+	if(usingDesktop)
+		var y = e.clientY - topOffset;
+	else
+		var y = e.targetTouches[0].pageY - topOffset;
 
 	//height of element
 	var sliderHeight = canvas.clientHeight;
@@ -571,25 +581,16 @@ function getNewName() {
 	return firstnames[Math.floor(Math.random() * firstnames.length)] + surnames[Math.floor(Math.random() * surnames.length)];
 }
 
-function mouseDown() {
-	
-	
-	console.log("HEJHEJEHEHJJEH");
-}
-
+//update role select screen by indicate which roles are taken or not takan
 function updateRoleAvailability(engi, gunner, pilot) {
 	document.getElementById('engineer').style.backgroundImage = "url('images/engi_available2.png')";
 	document.getElementById('gunner').style.backgroundImage = "url('images/gunner_available2.png')";
 	document.getElementById('pilot').style.backgroundImage = "url('images/pilot_available2.png')";
 
-	//alert('Update: engiTaken=' + engi + ", gunnerTaken=" + gunner + ", pilotTaken=" + pilot);
-
 	// Remove eventlisteners and add those that are available.
-
 	document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
 	document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
 	document.getElementById('pilot').removeEventListener('touchend', onButtonUp);
-	
 	
 	document.getElementById('pilot').removeEventListener('mousedown', onButtonUp);
 
@@ -601,7 +602,7 @@ function updateRoleAvailability(engi, gunner, pilot) {
 		if (role == 'engineer' && roleSet) {
 			document.getElementById('engineer').style.backgroundImage = "url('images/engi_chosen2.png')";
 			
-			//add touch and mouse listeners to role select items
+			//add touch listeners to role select items
 			document.getElementById('engineer').addEventListener('touchend', onButtonUp);
 			document.getElementById("engineer").addEventListener("mousedown", onButtonUp);
 		}
@@ -654,6 +655,104 @@ function updateRoleAvailability(engi, gunner, pilot) {
 	}
 }
 
+//used to create slider drag effect
+var mouseHeldDown = false;
+
+//register mouse click on engineer sliders
+function onMouseDown(e) {
+	
+	onTouchStart(e);
+	mouseHeldDown = true;
+} 
+
+//register mouse movement over engineer sliders
+function onMouseMove(e) {
+	
+	if(mouseHeldDown)
+		onTouchStart(e);
+}
+
+//register mouse release
+function onMouseUp(e) {
+	
+	mouseHeldDown = false;
+}
+
+//register key press
+function onKeyDown(e) {
+	
+	e.preventDefault();
+	
+	switch(e.keyCode) {
+		
+		//key is 'w'
+		case 87: 
+			rotY = 0.99;
+		break;
+		
+		//key is 's'
+		case 83:
+			rotY = -0.99;
+		break;
+		
+		//key is 'a'
+		case 65:
+			rotX = -0.99;
+		break;
+		
+		//key is 'd'
+		case 68:
+			rotX = 0.99;	
+		break;
+		
+		//key is 'space'
+		case 32:
+			if(role == 'pilot')
+				isThrusting = true;
+			else
+				isFiring = true;
+		break;
+	}
+}
+
+//register key release
+function onKeyUp(e) {
+	
+	e.preventDefault();
+	
+	switch(e.keyCode) {
+		
+		//key is 'w'
+		case 87: 
+			rotY = 0.0001;
+		break;
+		
+		//key is 's'
+		case 83:
+			rotY = 0.0001;
+		break;
+		
+		//key is 'a'
+		case 65:
+			rotX = 0.0001;
+		break;
+		
+		//key is 'd'
+		case 68:
+			rotX = 0.0001;	
+		break;
+		
+		//key is 'space'
+		case 32:
+			if(role == 'pilot')
+				isThrusting = false;
+			else
+				isFiring = false;
+		break;
+	}
+}
+
+//in game screens for each role
 function enterGame() {
 	alert('Buckle up, game is starting!');
 
@@ -688,6 +787,20 @@ function enterGame() {
 			shieldCanvas.addEventListener('touchstart', onTouchStart);
 			turretCanvas.addEventListener('touchstart', onTouchStart);
 			engineCanvas.addEventListener('touchstart', onTouchStart);
+			
+			//... and mouse listeners
+			shieldCanvas.addEventListener('mousemove', onMouseMove);
+			turretCanvas.addEventListener('mousemove', onMouseMove);
+			engineCanvas.addEventListener('mousemove', onMouseMove);
+
+			shieldCanvas.addEventListener('mousedown', onMouseDown);
+			turretCanvas.addEventListener('mousedown', onMouseDown);
+			engineCanvas.addEventListener('mousedown', onMouseDown);
+			
+			shieldCanvas.addEventListener('mouseup', onMouseUp);
+			turretCanvas.addEventListener('mouseup', onMouseUp);
+			engineCanvas.addEventListener('mouseup', onMouseUp);
+			document.addEventListener('mouseup', onMouseUp);
 
 			break;
 
@@ -733,7 +846,12 @@ function enterGame() {
 			document.getElementById("thrustAndFire").addEventListener("touchleave", onButtonLeave);
 			document.getElementById("thrustAndFire").addEventListener("touchcancel", onButtonCancel);
 
-			alert('Canvas width and height: (' + width + ", " + height + ")");
+			//add keyboard event listeners for desktop version
+			document.addEventListener("keydown", onKeyDown);	
+			document.addEventListener("keyup", onKeyUp);			
+			
+			//alert('Canvas width and height: (' + width + ", " + height + ")");
+			
 			document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
 			window.scrollTo(1, 0);
 			break;
@@ -775,8 +893,17 @@ function enterGame() {
 
 			document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
 			document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
+			
+			//use these listeners to prevent locked buttons when touchend isn't registered
+			document.getElementById("thrustAndFire").addEventListener("touchleave", onButtonLeave);
+			document.getElementById("thrustAndFire").addEventListener("touchcancel", onButtonCancel);
 
-			alert('Canvas width and height: (' + width + ", " + height + ")");
+			//add keyboard event listeners for desktop version
+			document.addEventListener("keydown", onKeyDown);
+			document.addEventListener("keyup", onKeyUp);
+			
+			//alert('Canvas width and height: (' + width + ", " + height + ")");
+			
 			document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
 			window.scrollTo(1, 0);
 			break;
