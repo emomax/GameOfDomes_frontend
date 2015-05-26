@@ -325,9 +325,6 @@ this.onButtonUp = function(e) {
 					sendItem('ChooseClassHandler', obj);
 
 					role = 'gunner';
-
-					//alert("waiting for confirmation..");
-
 				}
 				document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
 				document.getElementById('gunner').removeEventListener('touchend', onButtonUp);
@@ -674,7 +671,7 @@ function updateRoleAvailability(engi, gunner, pilot) {
 	}
 }
 
-//used to create slider drag effect
+//usedin mouseHandlers to create slider drag effect
 var mouseHeldDown = false;
 
 //register mouse click on engineer sliders
@@ -704,24 +701,32 @@ function onKeyDown(e) {
 	
 	switch(e.keyCode) {
 		
-		//key is 'w'
+		//key is 'w' or up
 		case 87: 
+		case 38:
 			rotY = 0.99;
+			document.getElementById('keyUp').style.display = 'inline';
 		break;
 		
-		//key is 's'
+		//key is 's' or down
 		case 83:
+		case 40:
 			rotY = -0.99;
+			document.getElementById('keyDown').style.display = 'inline';
 		break;
 		
-		//key is 'a'
+		//key is 'a' or left
 		case 65:
+		case 37:
 			rotX = -0.99;
+			document.getElementById('keyLeft').style.display = 'inline';
 		break;
 		
-		//key is 'd'
+		//key is 'd' or right
 		case 68:
-			rotX = 0.99;	
+		case 39:
+			rotX = 0.99;
+			document.getElementById('keyRight').style.display = 'inline';
 		break;
 		
 		//key is 'space'
@@ -730,6 +735,7 @@ function onKeyDown(e) {
 				isThrusting = true;
 			else
 				isFiring = true;
+			document.getElementById('keySpace').style.display = 'inline';
 		break;
 	}
 }
@@ -741,24 +747,32 @@ function onKeyUp(e) {
 	
 	switch(e.keyCode) {
 		
-		//key is 'w'
+		//key is 'w' or 'up'
 		case 87: 
+		case 38:
 			rotY = 0.0001;
+			document.getElementById('keyUp').style.display = 'none';
 		break;
 		
-		//key is 's'
+		//key is 's' or 'down'
 		case 83:
+		case 40:
 			rotY = 0.0001;
+			document.getElementById('keyDown').style.display = 'none';
 		break;
 		
-		//key is 'a'
+		//key is 'a' or 'left'
 		case 65:
+		case 37:
 			rotX = 0.0001;
+			document.getElementById('keyLeft').style.display = 'none';
 		break;
 		
-		//key is 'd'
+		//key is 'd' or 'right'
 		case 68:
-			rotX = 0.0001;	
+		case 39:
+			rotX = 0.0001;
+			document.getElementById('keyRight').style.display = 'none';			
 		break;
 		
 		//key is 'space'
@@ -767,6 +781,7 @@ function onKeyUp(e) {
 				isThrusting = false;
 			else
 				isFiring = false;
+			document.getElementById('keySpace').style.display = 'none';
 		break;
 	}
 }
@@ -781,11 +796,17 @@ function enterGame() {
 			break;
 
 		case 'gunner':
-				drawIngameGunnerPilot();
+				if(usingDesktop)
+					drawIngameDesktop();
+				else
+					drawIngameGunnerPilot();
 			break;
 
 		case 'pilot':
-				drawIngameGunnerPilot();
+				if(usingDesktop)
+					drawIngameDesktop();
+				else
+					drawIngameGunnerPilot();
 			break;
 	}
 }
@@ -795,8 +816,6 @@ function drawIngameEngineer() {
 	document.getElementById('roleView').style.display = 'none';
 	document.getElementById('engineerView').style.display = 'inline';
 	window.scrollTo(1, 0); //scroll away the adress bar (iphone)
-
-	//initiate the gui
 
 	//add variables for each canvas
 	var shieldCanvas = document.getElementById('shieldCanvas');
@@ -880,14 +899,29 @@ function drawIngameGunnerPilot() {
 	document.getElementById("thrustAndFire").addEventListener("touchleave", onButtonLeave);
 	document.getElementById("thrustAndFire").addEventListener("touchcancel", onButtonCancel);
 
-	//add keyboard event listeners for desktop version
-	document.addEventListener("keydown", onKeyDown);
-	document.addEventListener("keyup", onKeyUp);
-	
 	if(role == 'pilot')
 		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_shaded.png')";
 	else
 		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_shaded.png')";
+	
+	window.scrollTo(1, 0);
+}
+
+function drawIngameDesktop() {
+	
+	timeoutRot = setInterval( sendPilotGunnerValues, 20);
+	document.getElementById('roleView').style.display = 'none';
+	document.getElementById('desktopView').style.display = 'inline';
+	
+	//add keyboard event listeners for desktop version
+	document.addEventListener("keydown", onKeyDown);
+	document.addEventListener("keyup", onKeyUp);
+	
+	//set background image
+	if(role == 'pilot')
+		document.getElementById('desktopBackground').style.backgroundImage = "url('images/desktop_gui_pilot.png')";
+	else
+		document.getElementById('desktopBackground').style.backgroundImage = "url('images/desktop_gui_gunner.png')";
 	
 	window.scrollTo(1, 0);
 }

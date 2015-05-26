@@ -50,9 +50,8 @@
 					case 37: // left
 						onButtonUp();
 						clicked = false;
-					
-					break;
-
+						break;
+						
 					case 38: // up
 						break;
 
@@ -93,18 +92,9 @@
 			</div>		
 			
 			<div id='roleView'>
-				<div id='engineer' class='roleImg'>
-					<!--<center><h2> Engineer </h2> </center>
-					<img src="images/engi_available.png" alt="Engineer" class='roleImg'>-->
-				</div>
-				<div id='gunner' class='roleImg'>
-					<!--<center><h2> Gunner </h2></center> 
-					<img src="images/gunner_available.png" alt="Gunner" class='roleImg'>-->
-				</div>
-				<div id='pilot' class='roleImg'>
-					<!--<center><h2> Pilot </h2></center>
-					<img src="images/pilot_available.png" alt="Pilot" class='roleImg'>-->
-				</div>
+				<div id='engineer' class='roleImg'></div>
+				<div id='gunner' class='roleImg'></div>
+				<div id='pilot' class='roleImg'></div>
 			</div>
 			
 			<!-- class="engineerPanel" -->
@@ -157,11 +147,22 @@
 				</div>
 				
 				<div id="thrustAndFireContainer">
-					<div id="thrustAndFire"> 
-					</div>
+					<div id="thrustAndFire"></div>
 				</div>
 			
 			</div>
+			
+			<div id="desktopView" style="display: none;">
+			
+				<div id="desktopBackground">
+					<div id="keyUp" class="key"></div>
+					<div id="keyDown" class="key"></div>
+					<div id="keyLeft" class="key"></div>
+					<div id="keyRight" class="key"></div>
+					<div id="keySpace" class="key"></div>
+				</div>
+			
+			</div>	
 		</div>
 	</body>
 </html>

@@ -199,14 +199,59 @@ html, body{
 	padding: 0;
 }
 
+#desktopView {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
 
+#desktopBackground {
+	margin-left: 10%;
+	margin-top: 5%;
+	width: 80%;
+	height: 90%;
+	
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	background-position: center;
+	
+	position:relative;
+}
 
+.key {
+	display: none;
+	position: absolute;
+	width: 12.8%;
+	height: 18.7%;
+	background-color: rgba(255,0,0,0.5);
+}
 
+#keyUp {
+	left: 15.7%;
+	top: 21.5%;
+}
 
+#keyDown {
+	left: 18.7%;
+	top: 42%;
+}
 
+#keyLeft {
+	left: 4.4%;
+	top: 42%;
+}
 
+#keyRight {
+	left: 32.9%;
+	top: 42%;
+}
 
-
+#keySpace {
+	left: 13.7%;
+	top: 77.7%;
+	width: 69%;
+}
 
 
 
