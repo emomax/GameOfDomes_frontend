@@ -10,7 +10,7 @@ var roleSet = false;
 //total power for the engineer
 var maxPower = 1.0;
 
-//local variables to store the input untill it's sent
+//local variables to store the input until it's sent
 var isFiring = false;
 var isThrusting = false;
 
@@ -42,8 +42,10 @@ var img = new Image();
 img.src = 'images/joystick.png';
 
 var joyBackImg = new Image();
-joyBackImg.src = 'images/buttonwLine.png';
+joyBackImg.src = 'images/button_shaded.png';
 
+var joyDown = new Image();
+joyDown.src = 'images/button_green_withLine.png';
 
 //initiate smartfox and add smartfox event listeners
 function init() {
@@ -162,7 +164,7 @@ this.onButtonClick = function(e) {
 			ctx.fill();
 
 			//draw joystick background
-			ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
+			ctx.drawImage(joyDown, 0, 0, canvas.width, canvas.height);
 
 			//draw joystick line
 			ctx.beginPath();
@@ -173,7 +175,7 @@ this.onButtonClick = function(e) {
 			ctx.stroke();
 
 			//joystick button image
-			ctx.drawImage(img, _x - img.height/2, _y - img.height/2, img.width, img.height);
+			ctx.drawImage(img, _x - img.width/2, _y - img.height/2, img.width, img.height);
 
 			//break if out of canvas bounds
 			if (_y > canvas.height || _x > canvas.width) break;
@@ -190,7 +192,6 @@ this.onButtonClick = function(e) {
 			rotX = inputRotX;
 			rotY = inputRotY;
 
-			
 			break;
 
 		//thrust or fire button is clicked
@@ -198,9 +199,9 @@ this.onButtonClick = function(e) {
 		
 			//change button visual to indicate press
 			if (role=='pilot')
-				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward.png')";
+				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_green_withLine.png')";
 			else
-				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire.png')";
+				document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_green_withLine.png')";
 
 			//register fire/thrust input
 			if (role == 'pilot')
@@ -373,9 +374,9 @@ function clearThrustFire() {
 	
 	//Update button visually
 	if (role=='pilot')
-		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
+		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_shaded.png')";
 	else
-		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
+		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_shaded.png')";
 }
 
 //! Function for login attempt
@@ -758,158 +759,120 @@ function enterGame() {
 
 	switch (role) {
 		case 'engineer':
-			document.getElementById('roleView').style.display = 'none';
-			document.getElementById('engineerView').style.display = 'inline';
-			window.scrollTo(1, 0); //scroll away the adress bar (iphone)
-
-			//initiate the gui
-
-			//add variables for each canvas
-			var shieldCanvas = document.getElementById('shieldCanvas');
-			var sCtx = shieldCanvas.getContext('2d');
-
-			var turretCanvas = document.getElementById('turretCanvas');
-			var tCtx = turretCanvas.getContext('2d');
-
-			var engineCanvas = document.getElementById('engineCanvas');
-			var eCtx = engineCanvas.getContext('2d');
-
-			//draw sliders initially
-			drawSlider(sCtx, 0.333);
-			drawSlider(tCtx, 0.333);
-			drawSlider(eCtx, 0.333);
-
-			//add touch listeners
-			shieldCanvas.addEventListener('touchmove', onTouchMove);
-			turretCanvas.addEventListener('touchmove', onTouchMove);
-			engineCanvas.addEventListener('touchmove', onTouchMove);
-
-			shieldCanvas.addEventListener('touchstart', onTouchStart);
-			turretCanvas.addEventListener('touchstart', onTouchStart);
-			engineCanvas.addEventListener('touchstart', onTouchStart);
-			
-			//... and mouse listeners
-			shieldCanvas.addEventListener('mousemove', onMouseMove);
-			turretCanvas.addEventListener('mousemove', onMouseMove);
-			engineCanvas.addEventListener('mousemove', onMouseMove);
-
-			shieldCanvas.addEventListener('mousedown', onMouseDown);
-			turretCanvas.addEventListener('mousedown', onMouseDown);
-			engineCanvas.addEventListener('mousedown', onMouseDown);
-			
-			shieldCanvas.addEventListener('mouseup', onMouseUp);
-			turretCanvas.addEventListener('mouseup', onMouseUp);
-			engineCanvas.addEventListener('mouseup', onMouseUp);
-			document.addEventListener('mouseup', onMouseUp);
-
+				drawIngameEngineer();
 			break;
 
 		case 'gunner':
-			timeoutRot = setInterval( sendPilotGunnerValues, 20);
-			document.getElementById('roleView').style.display = 'none';
-			document.getElementById('pilotView').style.display = 'inline';
-
-			var container = document.getElementById('pilotContainer');
-			var cs = getComputedStyle(container);
-
-			var width = parseInt(cs.getPropertyValue('width'), 10);
-			var height = parseInt(cs.getPropertyValue('height'), 10);
-
-			var canvas = document.getElementById('pilotCanvas');
-			var ctx = canvas.getContext('2d');
-
-			canvas.width = width;
-			canvas.height = height;
-
-			originX = width / 2;
-			originY = height / 2;
-
-			ctx.rect(0,0,width, height);
-			ctx.fillStyle='rgba(0,0,0,1)';
-			ctx.fill();
-
-			//draw joystick background
-			ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
-
-			//draw joystick handle
-			ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
-
-			//canvas.addEventListener('touchstart', onButtonClick);
-			canvas.addEventListener('touchstart', onButtonClick);
-			canvas.addEventListener('touchmove', onButtonClick);
-			canvas.addEventListener('touchend', onButtonUp);
-
-			document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
-			document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
-			
-			//use these listeners to prevent locked buttons when touchend isn't registered
-			document.getElementById("thrustAndFire").addEventListener("touchleave", onButtonLeave);
-			document.getElementById("thrustAndFire").addEventListener("touchcancel", onButtonCancel);
-
-			//add keyboard event listeners for desktop version
-			document.addEventListener("keydown", onKeyDown);	
-			document.addEventListener("keyup", onKeyUp);			
-			
-			//alert('Canvas width and height: (' + width + ", " + height + ")");
-			
-			document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_pressed.png')";
-			window.scrollTo(1, 0);
+				drawIngameGunnerPilot();
 			break;
 
 		case 'pilot':
-			timeoutRot = setInterval( sendPilotGunnerValues, 20);
-			document.getElementById('roleView').style.display = 'none';
-			document.getElementById('pilotView').style.display = 'inline';
-
-			var container = document.getElementById('pilotContainer');
-			var cs = getComputedStyle(container);
-
-			var width = parseInt(cs.getPropertyValue('width'), 10);
-			var height = parseInt(cs.getPropertyValue('height'), 10);
-
-			var canvas = document.getElementById('pilotCanvas');
-			var ctx = canvas.getContext('2d');
-
-			canvas.width = width;
-			canvas.height = height;
-
-			originX = width / 2;
-			originY = height / 2;
-
-			ctx.rect(0,0,width, height);
-			ctx.fillStyle='#000';
-			ctx.fill();
-
-			//draw joystick background
-			ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
-
-			//draw joystick handle
-			ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
-
-			//canvas.addEventListener('touchstart', onButtonClick);
-			canvas.addEventListener('touchstart', onButtonClick);
-			canvas.addEventListener('touchmove', onButtonClick);
-			canvas.addEventListener('touchend', onButtonUp);
-
-			document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
-			document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
-			
-			//use these listeners to prevent locked buttons when touchend isn't registered
-			document.getElementById("thrustAndFire").addEventListener("touchleave", onButtonLeave);
-			document.getElementById("thrustAndFire").addEventListener("touchcancel", onButtonCancel);
-
-			//add keyboard event listeners for desktop version
-			document.addEventListener("keydown", onKeyDown);
-			document.addEventListener("keyup", onKeyUp);
-			
-			//alert('Canvas width and height: (' + width + ", " + height + ")");
-			
-			document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_pressed.png')";
-			window.scrollTo(1, 0);
+				drawIngameGunnerPilot();
 			break;
 	}
 }
 
+function drawIngameEngineer() {
+	
+	document.getElementById('roleView').style.display = 'none';
+	document.getElementById('engineerView').style.display = 'inline';
+	window.scrollTo(1, 0); //scroll away the adress bar (iphone)
+
+	//initiate the gui
+
+	//add variables for each canvas
+	var shieldCanvas = document.getElementById('shieldCanvas');
+	var sCtx = shieldCanvas.getContext('2d');
+
+	var turretCanvas = document.getElementById('turretCanvas');
+	var tCtx = turretCanvas.getContext('2d');
+
+	var engineCanvas = document.getElementById('engineCanvas');
+	var eCtx = engineCanvas.getContext('2d');
+
+	//draw sliders initially
+	drawSlider(sCtx, 0.333);
+	drawSlider(tCtx, 0.333);
+	drawSlider(eCtx, 0.333);
+
+	//add touch listeners
+	shieldCanvas.addEventListener('touchmove', onTouchMove);
+	turretCanvas.addEventListener('touchmove', onTouchMove);
+	engineCanvas.addEventListener('touchmove', onTouchMove);
+
+	shieldCanvas.addEventListener('touchstart', onTouchStart);
+	turretCanvas.addEventListener('touchstart', onTouchStart);
+	engineCanvas.addEventListener('touchstart', onTouchStart);
+	
+	//... and mouse listeners
+	shieldCanvas.addEventListener('mousemove', onMouseMove);
+	turretCanvas.addEventListener('mousemove', onMouseMove);
+	engineCanvas.addEventListener('mousemove', onMouseMove);
+
+	shieldCanvas.addEventListener('mousedown', onMouseDown);
+	turretCanvas.addEventListener('mousedown', onMouseDown);
+	engineCanvas.addEventListener('mousedown', onMouseDown);
+	
+	shieldCanvas.addEventListener('mouseup', onMouseUp);
+	turretCanvas.addEventListener('mouseup', onMouseUp);
+	engineCanvas.addEventListener('mouseup', onMouseUp);
+	document.addEventListener('mouseup', onMouseUp);
+}
+
+function drawIngameGunnerPilot() {
+	
+	timeoutRot = setInterval( sendPilotGunnerValues, 20);
+	document.getElementById('roleView').style.display = 'none';
+	document.getElementById('pilotView').style.display = 'inline';
+
+	var container = document.getElementById('pilotContainer');
+	var cs = getComputedStyle(container);
+
+	var width = parseInt(cs.getPropertyValue('width'), 10);
+	var height = parseInt(cs.getPropertyValue('height'), 10);
+
+	var canvas = document.getElementById('pilotCanvas');
+	var ctx = canvas.getContext('2d');
+
+	canvas.width = width;
+	canvas.height = height;
+
+	originX = width / 2;
+	originY = height / 2;
+
+	ctx.rect(0,0,width, height);
+	ctx.fillStyle='#000';
+	ctx.fill();
+
+	//draw joystick background
+	ctx.drawImage(joyBackImg, 0, 0, canvas.width, canvas.height);
+
+	//draw joystick handle
+	ctx.drawImage(img, canvas.width / 2 - img.width / 2, canvas.height / 2 - img.height/2);
+
+	//canvas.addEventListener('touchstart', onButtonClick);
+	canvas.addEventListener('touchstart', onButtonClick);
+	canvas.addEventListener('touchmove', onButtonClick);
+	canvas.addEventListener('touchend', onButtonUp);
+
+	document.getElementById("thrustAndFire").addEventListener("touchstart", onButtonClick);
+	document.getElementById("thrustAndFire").addEventListener("touchend", onButtonUp);
+	
+	//use these listeners to prevent locked buttons when touchend isn't registered
+	document.getElementById("thrustAndFire").addEventListener("touchleave", onButtonLeave);
+	document.getElementById("thrustAndFire").addEventListener("touchcancel", onButtonCancel);
+
+	//add keyboard event listeners for desktop version
+	document.addEventListener("keydown", onKeyDown);
+	document.addEventListener("keyup", onKeyUp);
+	
+	if(role == 'pilot')
+		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/forward_shaded.png')";
+	else
+		document.getElementById('thrustAndFire').style.backgroundImage = "url('images/fire_shaded.png')";
+	
+	window.scrollTo(1, 0);
+}
 
 
 
