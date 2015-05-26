@@ -47,6 +47,24 @@ joyBackImg.src = 'images/button_shaded.png';
 var joyDown = new Image();
 joyDown.src = 'images/button_green_withLine.png';
 
+
+// preload images for role selection
+
+/** ENGINEER PRELOAD IMG */
+var engiAvailableImg = new Image(); engiAvailableImg.src = 'images/engi_available2.png';
+var engiTakenImg = new Image(); engiTakenImg.src = 'images/engi_taken2.png';
+var engiChosenImg = new Image(); engiChosenImg.src = 'images/engi_chosen2.png';
+
+/** PILOT PRELOAD IMG */
+var pilotAvailableImg = new Image(); pilotAvailableImg.src = 'images/pilot_available2.png';
+var pilotTakenImg = new Image(); pilotTakenImg.src = 'images/pilot_taken2.png';
+var pilotChosenImg = new Image(); pilotChosenImg.src = 'images/pilot_chosen2.png';
+
+/** PILOT PRELOAD IMG */
+var gunnerAvailableImg = new Image(); gunnerAvailableImg.src = 'images/gunner_available2.png';
+var gunnerTakenImg = new Image(); gunnerTakenImg.src = 'images/gunner_taken2.png';
+var gunnerChosenImg = new Image(); gunnerChosenImg.src = 'images/gunner_chosen2.png';
+
 //initiate smartfox and add smartfox event listeners
 function init() {
 	console.log("Application started");
@@ -59,7 +77,7 @@ function init() {
 
 	// Create configuration object
 	var config = {};
-	config.host = "85.228.182.184";
+	config.host = "192.168.1.64";//"85.228.182.184";
 	config.port = 8888;
 	config.zone = "BasicExamples";
 	config.debug = true;
@@ -104,15 +122,15 @@ function onExtensionResponse(event) {
 	switch (event.cmd) {
 		case "RoleConfirmation":
 			if (!params.confirmed) {
-				alert ("That role was already taken!");
+				//alert ("That role was already taken!");
 				role = '';
 			} else {
 				//alert('Role set to ' + role + '!');
 				roleSet = true;
 
 				//start game. Debug to test engineer view, REMOVE THIS
-					var objTest = {};
-					sendItem('StartGame', objTest);
+					//var objTest = {};
+					//sendItem('StartGame', objTest);
 			}
 
 			updateRoleAvailability(engiTaken, gunnerTaken, pilotTaken);
@@ -584,9 +602,9 @@ function getNewName() {
 
 //update role select screen by indicate which roles are taken or not takan
 function updateRoleAvailability(engi, gunner, pilot) {
-	document.getElementById('engineer').style.backgroundImage = "url('images/engi_available2.png')";
-	document.getElementById('gunner').style.backgroundImage = "url('images/gunner_available2.png')";
-	document.getElementById('pilot').style.backgroundImage = "url('images/pilot_available2.png')";
+	document.getElementById('engineer').style.backgroundImage = "url('" + engiAvailableImg.src + "')";//"url('images/engi_available2.png')";
+	document.getElementById('gunner').style.backgroundImage = "url('" + gunnerAvailableImg.src + "')";//"url('images/gunner_available2.png')";
+	document.getElementById('pilot').style.backgroundImage = "url('" + pilotAvailableImg.src + "')";//"url('images/pilot_available2.png')";
 
 	// Remove eventlisteners and add those that are available.
 	document.getElementById('engineer').removeEventListener('touchend', onButtonUp);
@@ -601,14 +619,14 @@ function updateRoleAvailability(engi, gunner, pilot) {
 
 	if (engiTaken) {
 		if (role == 'engineer' && roleSet) {
-			document.getElementById('engineer').style.backgroundImage = "url('images/engi_chosen2.png')";
+			document.getElementById('engineer').style.backgroundImage = "url('" + engiChosenImg.src + "')";//"url('images/engi_chosen2.png')";
 			
 			//add touch listeners to role select items
 			document.getElementById('engineer').addEventListener('touchend', onButtonUp);
 			document.getElementById("engineer").addEventListener("mousedown", onButtonUp);
 		}
 		else {
-			document.getElementById('engineer').style.backgroundImage = "url('images/engi_taken2.png')";
+			document.getElementById('engineer').style.backgroundImage = "url('" + engiTakenImg.src + "')";//"url('images/engi_taken2.png')";
 		}
 	}
 	else {
@@ -619,7 +637,7 @@ function updateRoleAvailability(engi, gunner, pilot) {
 
 	if (gunnerTaken) {
 		if (role == 'gunner' && roleSet) {
-			document.getElementById('gunner').style.backgroundImage = "url('images/gunner_chosen2.png')";
+			document.getElementById('gunner').style.backgroundImage = "url('" + gunnerChosenImg.src + "')";//"url('images/gunner_chosen2.png')";
 			
 			
 			//add touch and mouse listeners to role select items
@@ -627,7 +645,7 @@ function updateRoleAvailability(engi, gunner, pilot) {
 			document.getElementById("gunner").addEventListener("mousedown", onButtonUp);
 		}
 		else {
-			document.getElementById('gunner').style.backgroundImage = "url('images/gunner_taken2.png')";
+			document.getElementById('gunner').style.backgroundImage = "url('" + gunnerTakenImg.src + "')";//"url('images/gunner_taken2.png')";
 		}
 	}
 	else {
@@ -639,14 +657,14 @@ function updateRoleAvailability(engi, gunner, pilot) {
 
 	if (pilotTaken) {
 		if (role == 'pilot' && roleSet) {
-			document.getElementById('pilot').style.backgroundImage = "url('images/pilot_chosen2.png')";
+			document.getElementById('pilot').style.backgroundImage = "url('" + pilotChosenImg.src + "')";//"url('images/pilot_chosen2.png')";
 			
 			//add touch and mouse listeners to role select items
 			document.getElementById('pilot').addEventListener('touchend', onButtonUp);
 			document.getElementById("pilot").addEventListener("mousedown", onButtonUp);	
 		}
 		else {
-			document.getElementById('pilot').style.backgroundImage = "url('images/pilot_taken2.png')";
+			document.getElementById('pilot').style.backgroundImage = "url('" + pilotTakenImg.src + "')"//"url('images/pilot_taken2.png')";
 		}
 	}
 	else {
